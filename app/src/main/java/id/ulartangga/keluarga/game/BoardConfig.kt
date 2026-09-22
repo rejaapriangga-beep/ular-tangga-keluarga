@@ -1,19 +1,23 @@
 package id.ulartangga.keluarga.game
 
 object BoardConfig {
+    const val COLUMNS = 7
+    const val ROWS = 14
+    const val TOTAL_CELLS = COLUMNS * ROWS
+
     val ladders: Map<Int, Int> = mapOf(
-        2 to 38, 7 to 14, 8 to 31, 15 to 26, 21 to 42,
-        28 to 84, 36 to 44, 51 to 67, 71 to 91, 78 to 98, 87 to 94
+        3 to 24, 9 to 28, 13 to 32, 19 to 38, 23 to 44,
+        30 to 49, 34 to 53, 41 to 60, 52 to 71, 67 to 86, 76 to 95
     )
 
     val snakes: Map<Int, Int> = mapOf(
-        16 to 6, 46 to 25, 49 to 11, 62 to 19, 64 to 60,
-        74 to 53, 89 to 68, 92 to 88, 95 to 75, 99 to 80
+        17 to 5, 26 to 10, 37 to 18, 43 to 22, 54 to 33,
+        61 to 40, 70 to 48, 79 to 57, 88 to 65, 96 to 75
     )
 
-    val cardCells: Set<Int> = setOf(5, 24, 33, 40, 58, 66, 77, 85, 93)
+    val cardCells: Set<Int> = setOf(4, 11, 20, 29, 46, 58, 66, 77, 90)
 
-    val mysteryCells: Set<Int> = setOf(3, 12, 20, 45, 55, 70, 82, 90, 97)
+    val mysteryCells: Set<Int> = setOf(6, 14, 21, 31, 47, 59, 68, 80, 91)
 
-    val miniGameCells: Set<Int> = setOf(10, 18, 27, 48, 57, 65, 73, 83)
+    val miniGameCells: Set<Int> = setOf(8, 16, 25, 36, 50, 64, 74, 84)
 }

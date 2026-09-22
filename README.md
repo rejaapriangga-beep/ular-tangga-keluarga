@@ -4,7 +4,7 @@ Game ular tangga Android untuk dimainkan bersama keluarga — papan klasik denga
 
 ## Konsep
 
-- **Papan hangat & hidup**: papan 10x10 dengan checkerboard warna hijau lembut yang membesar mengikuti ruang layar yang tersedia (tinggi diutamakan agar papan bisa memenuhi hampir seluruh layar di mode potret), tangga digambar dengan dua rel + anak tangga (bukan garis polos), ular digambar seram dengan badan menyambung meruncing ke ekor, kepala berbentuk oval menghadap keluar lengkap dengan mata sipit kuning dan lidah bercabang merah (bukan lagi seperti cacing), plus backdrop vektor bertema (bukit & pohon di Hutan Tropis, gedung neon di Kota Malam, bintang & planet di Luar Angkasa) di belakang papan. Pion pemain berupa token karakter hewan (🦁🐼🐰🦖) berukuran besar di atas lingkaran berwarna, berpindah dengan animasi halus per kotak (bukan lompat kaku). Dadu putih dengan titik (pip) seperti dadu asli, selalu di posisi tengah layar, dan berubah abu-abu otomatis saat bukan giliran pemain tersebut. Info giliran ditampilkan sebagai pita warna besar berisi avatar & nama pemain aktif ("Giliran ..."), plus pesan status permainan yang tampil dalam kartu warna agar lebih mudah terbaca. Judul ditampilkan sebagai "papan nama kayu" ala petualangan.
+- **Papan hangat & hidup**: papan 7x14 (7 kotak per baris, 98 kotak total) dengan checkerboard warna hijau lembut, kotak lebih besar karena lebar papan dibagi 7 (bukan 10) dan membesar mengikuti ruang layar yang tersedia (tinggi diutamakan agar papan bisa memenuhi hampir seluruh layar di mode potret), tangga digambar dengan dua rel + anak tangga (bukan garis polos), ular digambar seram dengan badan menyambung meruncing ke ekor, kepala berbentuk oval menghadap keluar lengkap dengan mata sipit kuning dan lidah bercabang merah (bukan lagi seperti cacing), plus backdrop vektor bertema (bukit & pohon di Hutan Tropis, gedung neon di Kota Malam, bintang & planet di Luar Angkasa) di belakang papan. Pion pemain berupa token karakter hewan (🦁🐼🐰🦖) berukuran besar di atas lingkaran berwarna, berpindah dengan animasi halus per kotak (bukan lompat kaku). Dadu putih dengan titik (pip) seperti dadu asli, selalu di posisi tengah layar, dan berubah abu-abu otomatis saat bukan giliran pemain tersebut. Info giliran ditampilkan sebagai pita warna besar berisi avatar & nama pemain aktif ("Giliran ..."), plus pesan status permainan yang tampil dalam kartu warna agar lebih mudah terbaca. Judul ditampilkan sebagai "papan nama kayu" ala petualangan.
 - **Mekanik modern (Power-Card)**: tiga kartu sederhana yang bisa didapat dari kotak khusus di papan.
   - 🛡️ **Perisai** — otomatis melindungi dari satu gigitan ular berikutnya.
   - 🎲 **Dadu Ganda** — aktifkan sebelum melempar untuk melempar dua dadu dan memakai angka tertinggi.
@@ -16,7 +16,7 @@ Game ular tangga Android untuk dimainkan bersama keluarga — papan klasik denga
 ## Status: MVP (Fase 1)
 
 Yang sudah ada di project ini:
-- Papan 10x10 dengan tangga & ular klasik, animasi pion per kotak.
+- Papan 7x14 (98 kotak) dengan tangga & ular klasik, animasi pion per kotak.
 - Dadu 3D-style dengan animasi putar.
 - Mode lokal pass-and-play 2–4 pemain di satu perangkat, atau vs Bot.
 - Kustomisasi warna pion otomatis dari palet 4 warna.
@@ -31,7 +31,7 @@ Yang sudah ada di project ini:
 - Ritual harian: streak hari main berturut-turut (disimpan di perangkat via `SharedPreferences`), memberi kartu power-card gratis tiap kali app dibuka di hari baru.
 - Mini-game "Tap Cepat" (⚡ kotak spesial): tantangan reflex 3 detik, berhasil = maju 4 langkah, gagal = tidak ada efek buruk.
 - 3 Mode Permainan yang bisa dipilih di layar setup:
-  - 🏁 **Klasik** — pemain pertama sampai kotak 100 menang.
+  - 🏁 **Klasik** — pemain pertama sampai kotak 98 menang.
   - 🤝 **Co-op** — semua pemain bekerja sama, menang bersama saat semua pemain sampai finish.
   - 💥 **Battle Royale Mini** — kotak acak di papan runtuh setiap beberapa giliran; mendarat di kotak yang sudah runtuh membuat pemain terpental kembali ke posisi sebelumnya.
 - **Main Online (v1, room code)**: satu anggota keluarga jadi host, buat room dan dapat kode 5 karakter, anggota lain gabung pakai kode itu dari device masing-masing (tidak perlu akun/login). Real-time sync posisi & giliran lewat Firebase Realtime Database, host-authoritative (hanya device host yang menjalankan logika permainan; device tamu hanya merender & mengirim permintaan lempar dadu).

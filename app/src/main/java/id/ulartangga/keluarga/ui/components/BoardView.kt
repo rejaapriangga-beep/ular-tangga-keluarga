@@ -42,12 +42,14 @@ import kotlin.math.sqrt
 private data class CellGeometry(val row: Int, val col: Int, val center: Offset)
 
 private fun cellGeometry(cell: Int, cellPx: Float): CellGeometry {
-    val idx = (cell - 1).coerceIn(0, 99)
-    val row = idx / 10
-    var col = idx % 10
-    if (row % 2 == 1) col = 9 - col
+    val columns = BoardConfig.COLUMNS
+    val rows = BoardConfig.ROWS
+    val idx = (cell - 1).coerceIn(0, BoardConfig.TOTAL_CELLS - 1)
+    val row = idx / columns
+    var col = idx % columns
+    if (row % 2 == 1) col = columns - 1 - col
     val x = col * cellPx + cellPx / 2f
-    val y = (9 - row) * cellPx + cellPx / 2f
+    val y = (rows - 1 - row) * cellPx + cellPx / 2f
     return CellGeometry(row, col, Offset(x, y))
 }
 
@@ -194,14 +196,17 @@ fun BoardView(
 
     Box(
         modifier = modifier
-            .aspectRatio(1f, matchHeightConstraintsFirst = true)
+            .aspectRatio(
+                BoardConfig.COLUMNS.toFloat() / BoardConfig.ROWS.toFloat(),
+                matchHeightConstraintsFirst = true
+            )
             .onGloballyPositioned { coords -> boardPx = coords.size.width.toFloat() }
     ) {
         if (boardPx > 0f) {
-            val cellPx = boardPx / 10f
+            val cellPx = boardPx / BoardConfig.COLUMNS.toFloat()
 
             Canvas(modifier = Modifier.matchParentSize()) {
-                for (cell in 1..100) {
+                for (cell in 1..BoardConfig.TOTAL_CELLS) {
                     val geo = cellGeometry(cell, cellPx)
                     val topLeft = Offset(geo.center.x - cellPx / 2f, geo.center.y - cellPx / 2f)
                     val isEven = (geo.row + geo.col) % 2 == 0

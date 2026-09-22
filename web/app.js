@@ -19,11 +19,15 @@ const AVATARS = [
 ];
 const COLORS = ["#E53935", "#1E88E5", "#43A047", "#FDD835"];
 
-const LADDERS = { 2: 38, 7: 14, 8: 31, 15: 26, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 78: 98, 87: 94 };
-const SNAKES = { 16: 6, 46: 25, 49: 11, 62: 19, 64: 60, 74: 53, 89: 68, 92: 88, 95: 75, 99: 80 };
-const CARD_CELLS = new Set([5, 24, 33, 40, 58, 66, 77, 85, 93]);
-const MYSTERY_CELLS = new Set([3, 12, 20, 45, 55, 70, 82, 90, 97]);
-const MINIGAME_CELLS = new Set([10, 18, 27, 48, 57, 65, 73, 83]);
+const COLUMNS = 7;
+const ROWS = 14;
+const TOTAL_CELLS = COLUMNS * ROWS;
+
+const LADDERS = { 3: 24, 9: 28, 13: 32, 19: 38, 23: 44, 30: 49, 34: 53, 41: 60, 52: 71, 67: 86, 76: 95 };
+const SNAKES = { 17: 5, 26: 10, 37: 18, 43: 22, 54: 33, 61: 40, 70: 48, 79: 57, 88: 65, 96: 75 };
+const CARD_CELLS = new Set([4, 11, 20, 29, 46, 58, 66, 77, 90]);
+const MYSTERY_CELLS = new Set([6, 14, 21, 31, 47, 59, 68, 80, 91]);
+const MINIGAME_CELLS = new Set([8, 16, 25, 36, 50, 64, 74, 84]);
 
 function getDeviceId() {
   let id = localStorage.getItem("deviceId");
@@ -151,23 +155,23 @@ function enterGame() {
 }
 
 function cellGeometry(cell) {
-  const idx = Math.min(Math.max(cell - 1, 0), 99);
-  const row = Math.floor(idx / 10);
-  let col = idx % 10;
-  if (row % 2 === 1) col = 9 - col;
+  const idx = Math.min(Math.max(cell - 1, 0), TOTAL_CELLS - 1);
+  const row = Math.floor(idx / COLUMNS);
+  let col = idx % COLUMNS;
+  if (row % 2 === 1) col = COLUMNS - 1 - col;
   return { row, col };
 }
 
 function buildBoard() {
   const board = el("board");
   board.innerHTML = "";
-  for (let cell = 1; cell <= 100; cell++) {
+  for (let cell = 1; cell <= TOTAL_CELLS; cell++) {
     const { row, col } = cellGeometry(cell);
     const div = document.createElement("div");
     const isEven = (row + col) % 2 === 0;
     div.className = "cell " + (isEven ? "light" : "dark");
     div.style.gridColumn = col + 1;
-    div.style.gridRow = 10 - row;
+    div.style.gridRow = ROWS - row;
     div.textContent = cell;
 
     let badge = "";
@@ -189,8 +193,8 @@ function buildBoard() {
 
 function tokenPosition(cell) {
   const { row, col } = cellGeometry(cell);
-  const x = (col + 0.5) * 10; // percent
-  const y = (9 - row + 0.5) * 10;
+  const x = (col + 0.5) * (100 / COLUMNS); // percent
+  const y = (ROWS - 1 - row + 0.5) * (100 / ROWS);
   return { x, y };
 }
 

@@ -96,7 +96,7 @@ class GameEngine(
         player.lastRoll = finalRoll
 
         val start = player.position
-        val target = (start + finalRoll).coerceAtMost(100)
+        val target = (start + finalRoll).coerceAtMost(BoardConfig.TOTAL_CELLS)
 
         if (mode == GameMode.BATTLE_ROYALE && target in collapsedCells) {
             for (cell in (start + 1)..target) {
@@ -150,7 +150,7 @@ class GameEngine(
                 result
             }
             if (success) {
-                val newPos = (player.position + 4).coerceAtMost(100)
+                val newPos = (player.position + 4).coerceAtMost(BoardConfig.TOTAL_CELLS)
                 player.position = newPos
                 player.animatedCell = newPos
                 message = "${player.name} berhasil tantangan Tap Cepat! Maju 4 langkah!"
@@ -209,7 +209,7 @@ class GameEngine(
 
     /** Mengembalikan true jika giliran sudah ditutup di sini (pemain menang / finish) sehingga rollDice() harus berhenti. */
     private fun finishTurnIfWon(player: Player): Boolean {
-        if (player.position != 100) return false
+        if (player.position != BoardConfig.TOTAL_CELLS) return false
         onSound(SoundEvent.WIN)
         if (mode == GameMode.COOP) {
             if (!player.finished) {
@@ -247,8 +247,8 @@ class GameEngine(
         val reserved = BoardConfig.ladders.keys + BoardConfig.ladders.values +
             BoardConfig.snakes.keys + BoardConfig.snakes.values +
             BoardConfig.cardCells + BoardConfig.mysteryCells + BoardConfig.miniGameCells +
-            collapsedCells.toSet() + occupied + setOf(1, 100)
-        val candidate = (2..99).filter { it !in reserved }.randomOrNull() ?: return
+            collapsedCells.toSet() + occupied + setOf(1, BoardConfig.TOTAL_CELLS)
+        val candidate = (2 until BoardConfig.TOTAL_CELLS).filter { it !in reserved }.randomOrNull() ?: return
         collapsedCells.add(candidate)
         message = (message?.let { "$it " } ?: "") + "⚠️ Kotak $candidate mulai retak dan runtuh!"
     }
@@ -262,7 +262,7 @@ class GameEngine(
         }
         return when (outcomePool.random()) {
             MysteryOutcome.FORWARD -> {
-                val newPos = (player.position + 5).coerceAtMost(100)
+                val newPos = (player.position + 5).coerceAtMost(BoardConfig.TOTAL_CELLS)
                 player.position = newPos
                 player.animatedCell = newPos
                 message = "${player.name} kena Kotak Misteri: maju 5 langkah!"

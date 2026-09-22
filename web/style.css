@@ -85,10 +85,10 @@ button:disabled { background: #a5a5a5; cursor: not-allowed; }
 #board {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 7 / 14;
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(14, 1fr);
   border: 3px solid var(--wood-dark);
   border-radius: 8px;
   overflow: hidden;
