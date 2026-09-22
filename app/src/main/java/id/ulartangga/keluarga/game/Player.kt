@@ -12,7 +12,9 @@ class Player(
     val color: Color,
     val avatar: AnimalAvatar,
     val isBot: Boolean,
-    val isYoungPlayer: Boolean = false
+    val isYoungPlayer: Boolean = false,
+    val isRemote: Boolean = false,
+    val remoteId: String? = null
 ) {
     var position by mutableStateOf(1)
     var animatedCell by mutableStateOf(1)

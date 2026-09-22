@@ -21,11 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import id.ulartangga.keluarga.data.DailyRewardManager
 import id.ulartangga.keluarga.game.GameEngine
-import id.ulartangga.keluarga.game.GameMode
 import id.ulartangga.keluarga.game.PowerCardType
+import id.ulartangga.keluarga.online.DeviceId
+import id.ulartangga.keluarga.online.OnlineGuestController
+import id.ulartangga.keluarga.online.OnlineHostController
+import id.ulartangga.keluarga.online.RoomRepository
 import id.ulartangga.keluarga.sound.SoundManager
 import id.ulartangga.keluarga.ui.components.ThemeBackdrop
 import id.ulartangga.keluarga.ui.screens.GameScreen
+import id.ulartangga.keluarga.ui.screens.OnlineGuestGameScreen
+import id.ulartangga.keluarga.ui.screens.OnlineHostGameScreen
+import id.ulartangga.keluarga.ui.screens.OnlineLobbyScreen
 import id.ulartangga.keluarga.ui.screens.SetupScreen
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import id.ulartangga.keluarga.ui.theme.UlarTanggaTheme
@@ -39,15 +45,25 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private sealed class AppScreen {
+    object Setup : AppScreen()
+    data class Local(val engine: GameEngine) : AppScreen()
+    object OnlineLobby : AppScreen()
+    data class OnlineHost(val controller: OnlineHostController, val roomCode: String) : AppScreen()
+    data class OnlineGuest(val controller: OnlineGuestController, val roomCode: String) : AppScreen()
+}
+
 @Composable
 fun UlarTanggaApp() {
-    var engine by remember { mutableStateOf<GameEngine?>(null) }
+    var screen by remember { mutableStateOf<AppScreen>(AppScreen.Setup) }
     var soundOn by remember { mutableStateOf(true) }
     var boardTheme by remember { mutableStateOf(BoardTheme.FOREST) }
     val soundManager = remember { SoundManager() }
 
     val context = LocalContext.current
     val dailyRewardManager = remember { DailyRewardManager(context) }
+    val repository = remember { RoomRepository(context) }
+    val myDeviceId = remember { DeviceId.get(context) }
     var dailyReward by remember { mutableStateOf<DailyRewardManager.ClaimResult?>(null) }
     var pendingBonusCard by remember { mutableStateOf<PowerCardType?>(null) }
 
@@ -64,9 +80,8 @@ fun UlarTanggaApp() {
             Box(modifier = Modifier.fillMaxSize()) {
                 ThemeBackdrop(theme = boardTheme, modifier = Modifier.fillMaxSize())
 
-                val current = engine
-                if (current == null) {
-                    SetupScreen(
+                when (val current = screen) {
+                    is AppScreen.Setup -> SetupScreen(
                         selectedTheme = boardTheme,
                         onThemeChange = { boardTheme = it },
                         onStart = { players, mode ->
@@ -77,18 +92,50 @@ fun UlarTanggaApp() {
                                 }
                                 pendingBonusCard = null
                             }
-                            engine = GameEngine(players, mode) { event ->
+                            val engine = GameEngine(players, mode) { event ->
                                 if (soundOn) soundManager.play(event)
                             }
-                        }
+                            screen = AppScreen.Local(engine)
+                        },
+                        onPlayOnline = { screen = AppScreen.OnlineLobby }
                     )
-                } else {
-                    GameScreen(
-                        engine = current,
+
+                    is AppScreen.Local -> GameScreen(
+                        engine = current.engine,
                         theme = boardTheme,
                         soundOn = soundOn,
                         onToggleSound = { soundOn = !soundOn },
-                        onExit = { engine = null }
+                        onExit = { screen = AppScreen.Setup }
+                    )
+
+                    is AppScreen.OnlineLobby -> OnlineLobbyScreen(
+                        myDeviceId = myDeviceId,
+                        repository = repository,
+                        onEnterRoom = { code, isHost, entries ->
+                            screen = if (isHost) {
+                                val controller = OnlineHostController(repository, code, entries, myDeviceId) { event ->
+                                    if (soundOn) soundManager.play(event)
+                                }
+                                AppScreen.OnlineHost(controller, code)
+                            } else {
+                                AppScreen.OnlineGuest(OnlineGuestController(repository, code, myDeviceId, entries), code)
+                            }
+                        },
+                        onBack = { screen = AppScreen.Setup }
+                    )
+
+                    is AppScreen.OnlineHost -> OnlineHostGameScreen(
+                        controller = current.controller,
+                        roomCode = current.roomCode,
+                        theme = boardTheme,
+                        onExit = { screen = AppScreen.Setup }
+                    )
+
+                    is AppScreen.OnlineGuest -> OnlineGuestGameScreen(
+                        controller = current.controller,
+                        roomCode = current.roomCode,
+                        theme = boardTheme,
+                        onExit = { screen = AppScreen.Setup }
                     )
                 }
 

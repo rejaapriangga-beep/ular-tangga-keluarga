@@ -34,28 +34,41 @@ Yang sudah ada di project ini:
   - 🏁 **Klasik** — pemain pertama sampai kotak 100 menang.
   - 🤝 **Co-op** — semua pemain bekerja sama, menang bersama saat semua pemain sampai finish.
   - 💥 **Battle Royale Mini** — kotak acak di papan runtuh setiap beberapa giliran; mendarat di kotak yang sudah runtuh membuat pemain terpental kembali ke posisi sebelumnya.
+- **Main Online (v1, room code)**: satu anggota keluarga jadi host, buat room dan dapat kode 5 karakter, anggota lain gabung pakai kode itu dari device masing-masing (tidak perlu akun/login). Real-time sync posisi & giliran lewat Firebase Realtime Database, host-authoritative (hanya device host yang menjalankan logika permainan; device tamu hanya merender & mengirim permintaan lempar dadu).
+  - **Batasan v1** (sengaja disederhanakan): hanya mode Klasik yang tersedia online (Co-op/Battle Royale belum disinkronkan); kartu Dadu Ganda/Tukar Posisi & mini-game Tap Cepat untuk pemain tamu diproses otomatis oleh sistem (belum ada dialog interaktif lintas-device); tidak ada chat.
+  - **Perlu setup manual**: lihat bagian [Setup Firebase untuk Main Online](#setup-firebase-untuk-main-online) di bawah — tanpa ini, tombol Main Online akan menampilkan pesan "belum dikonfigurasi" tapi sisa aplikasi tetap jalan normal.
 
 ## Roadmap (Fase berikutnya)
 
 - Replay/highlight akhir permainan yang bisa dibagikan.
-- Multiplayer online.
+- Main Online untuk mode Co-op/Battle Royale, kartu & mini-game interaktif lintas-device, chat/reaction ringan.
 
 ## Struktur Project
 
 ```
 app/src/main/java/id/ulartangga/keluarga/
-├── MainActivity.kt              # Entry point, state tema, navigasi Setup <-> Game
+├── MainActivity.kt              # Entry point, navigasi antar layar (Setup/Local/Online)
 ├── game/
-│   ├── Player.kt                 # Model pemain (posisi, kartu, warna)
+│   ├── Player.kt                 # Model pemain (posisi, kartu, warna, remote id)
 │   ├── PowerCardType.kt          # Definisi 3 jenis power-card
-│   ├── BoardConfig.kt            # Posisi tangga, ular, kotak kartu
+│   ├── GameMode.kt               # Klasik / Co-op / Battle Royale Mini
+│   ├── BoardConfig.kt            # Posisi tangga, ular, kotak kartu/misteri/mini-game
 │   └── GameEngine.kt             # Logika giliran, lempar dadu, kartu, menang
+├── data/
+│   └── DailyRewardManager.kt     # Streak harian via SharedPreferences
+├── online/
+│   ├── FirebaseConfig.kt         # Kredensial Firebase (diisi manual, lihat di bawah)
+│   ├── FirebaseBootstrap.kt      # Init FirebaseApp manual tanpa google-services.json
+│   ├── DeviceId.kt               # Id stabil per instalasi app
+│   ├── RoomRepository.kt         # Wrapper Firebase Realtime Database (room code)
+│   ├── OnlineHostController.kt   # Device host: jalankan GameEngine, siarkan state
+│   └── OnlineGuestController.kt  # Device tamu: render state, kirim aksi lempar dadu
 ├── sound/
 │   └── SoundManager.kt           # Efek suara sederhana via ToneGenerator
 └── ui/
     ├── theme/                    # BoardTheme (3 tema visual), tipografi Material3
-    ├── components/                # BoardView (papan + pion, ikut BoardTheme), DiceView
-    └── screens/                   # SetupScreen (pilih tema+pemain), GameScreen
+    ├── components/                # BoardView, DiceView, MiniGameDialog, WoodenSign, dst.
+    └── screens/                   # SetupScreen, GameScreen, OnlineLobbyScreen, OnlineGameScreen
 ```
 
 ## Menjalankan Project
@@ -65,3 +78,16 @@ app/src/main/java/id/ulartangga/keluarga/
 3. Jalankan konfigurasi `app` ke emulator atau perangkat Android 8.0 (API 26) ke atas.
 
 > Catatan: kode ini disusun langsung tanpa proses build lokal di lingkungan pembuatan (tidak ada Android SDK tersedia di sana). Saat pertama kali dibuka di Android Studio, lakukan Gradle sync dan perbaiki bila ada ketidakcocokan versi API kecil sebelum run pertama.
+
+## Setup Firebase untuk Main Online
+
+Fitur Main Online butuh project Firebase milik kamu sendiri (gratis untuk skala keluarga). Ini tidak bisa disiapkan otomatis dari sesi pembuatan project ini karena butuh akun Google.
+
+1. Buka [console.firebase.google.com](https://console.firebase.google.com), buat project baru (nama bebas).
+2. Di project itu, buka **Build → Realtime Database → Create Database**. Pilih lokasi server, lalu mulai dalam **test mode** (aturan akses terbuka) — cukup aman untuk v1 karena akses room dilindungi kode room yang hanya dibagikan ke keluarga sendiri, bukan untuk data sensitif.
+3. Buka **Project settings (ikon gerigi) → General**, scroll ke "Your apps", klik ikon **Web (`</>`)** untuk mendaftarkan "web app" (tidak perlu app Android sungguhan — kita hanya butuh nilai config-nya untuk init manual).
+4. Salin nilai `apiKey`, `appId`, `projectId`, dan `databaseURL` dari config yang muncul.
+5. Tempel ke `app/src/main/java/id/ulartangga/keluarga/online/FirebaseConfig.kt`, isi 4 konstanta di sana.
+6. Commit & push — CI akan build ulang otomatis, dan tombol "Main Online" di app akan aktif.
+
+Tanpa langkah di atas, aplikasi tetap berjalan normal (semua fitur offline utuh) — tombol Main Online hanya akan menampilkan pesan bahwa fitur belum dikonfigurasi.

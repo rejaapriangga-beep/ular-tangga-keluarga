@@ -159,7 +159,7 @@ private fun TopBar(onExit: () -> Unit, soundOn: Boolean, onToggleSound: () -> Un
 }
 
 @Composable
-private fun PlayersRow(players: List<Player>, currentPlayer: Player) {
+fun PlayersRow(players: List<Player>, currentPlayer: Player) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -197,7 +197,7 @@ private fun PlayersRow(players: List<Player>, currentPlayer: Player) {
 }
 
 @Composable
-private fun CardTray(
+fun CardTray(
     player: Player,
     enabled: Boolean,
     onUseDoubleDice: () -> Unit,
@@ -221,7 +221,7 @@ private fun CardTray(
 }
 
 @Composable
-private fun SwapTargetDialog(
+fun SwapTargetDialog(
     players: List<Player>,
     onSelect: (Player) -> Unit,
     onDismiss: () -> Unit
@@ -245,7 +245,7 @@ private fun SwapTargetDialog(
 }
 
 @Composable
-private fun WinnerDialog(winner: Player, onPlayAgain: () -> Unit) {
+fun WinnerDialog(winner: Player, onPlayAgain: () -> Unit) {
     AlertDialog(
         onDismissRequest = {},
         confirmButton = {

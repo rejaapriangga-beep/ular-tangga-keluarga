@@ -140,7 +140,7 @@ class GameEngine(
 
         var miniGameMoved = false
         if (target in BoardConfig.miniGameCells) {
-            val success = if (player.isBot) {
+            val success = if (player.isBot || player.isRemote) {
                 Random.nextInt(100) < 55
             } else {
                 val deferred = CompletableDeferred<Boolean>()

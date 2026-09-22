@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -37,7 +38,8 @@ import kotlin.math.roundToInt
 fun SetupScreen(
     selectedTheme: BoardTheme,
     onThemeChange: (BoardTheme) -> Unit,
-    onStart: (List<Player>, GameMode) -> Unit
+    onStart: (List<Player>, GameMode) -> Unit,
+    onPlayOnline: () -> Unit
 ) {
     var playerCount by remember { mutableStateOf(2) }
     var vsBot by remember { mutableStateOf(true) }
@@ -145,6 +147,12 @@ fun SetupScreen(
             onStart(players, selectedMode)
         }) {
             Text("Mulai Bermain")
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedButton(onClick = onPlayOnline) {
+            Text("🌐 Main Online (Room Code)")
         }
     }
 }
