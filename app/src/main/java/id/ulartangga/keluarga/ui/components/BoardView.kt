@@ -63,6 +63,22 @@ private fun quadraticPoint(p0: Offset, control: Offset, p1: Offset, t: Float): O
     return Offset(x, y)
 }
 
+/** Pola garis finish (kotak-kotak hitam putih ala bendera balap) di kotak terakhir. */
+private fun DrawScope.drawFinishPattern(topLeft: Offset, cellPx: Float) {
+    val divisions = 4
+    val sub = cellPx / divisions
+    for (row in 0 until divisions) {
+        for (col in 0 until divisions) {
+            val isBlack = (row + col) % 2 == 0
+            drawRect(
+                color = if (isBlack) Color.Black else Color.White,
+                topLeft = Offset(topLeft.x + col * sub, topLeft.y + row * sub),
+                size = Size(sub, sub)
+            )
+        }
+    }
+}
+
 /** Tangga proper: dua rel sejajar dengan anak tangga melintang, bukan garis polos. */
 private fun DrawScope.drawLadder(a: Offset, b: Offset, theme: BoardTheme, cellPx: Float) {
     val dir = Offset(b.x - a.x, b.y - a.y)
@@ -216,6 +232,9 @@ fun BoardView(
                         topLeft = topLeft,
                         size = Size(cellPx, cellPx)
                     )
+                    if (cell == BoardConfig.TOTAL_CELLS) {
+                        drawFinishPattern(topLeft, cellPx)
+                    }
                     if (cell in BoardConfig.cardCells) {
                         drawCircle(color = theme.cardCellColor, radius = cellPx * 0.12f, center = geo.center)
                     }
@@ -267,7 +286,11 @@ fun BoardView(
                         topLeft.x + cellPx * 0.08f,
                         topLeft.y + cellPx * 0.22f,
                         android.graphics.Paint().apply {
-                            color = textColor
+                            color = if (cell == BoardConfig.TOTAL_CELLS) {
+                                android.graphics.Color.parseColor("#FFEB3B")
+                            } else {
+                                textColor
+                            }
                             textSize = cellPx * 0.19f
                             isFakeBoldText = true
                         }

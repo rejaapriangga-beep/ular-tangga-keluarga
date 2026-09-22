@@ -11,7 +11,9 @@ class SoundManager {
     fun play(event: SoundEvent) {
         val tg = toneGenerator ?: return
         when (event) {
-            SoundEvent.TICK -> tg.startTone(ToneGenerator.TONE_PROP_BEEP, 90)
+            // ToneGenerator hanya punya preset nada telepon (tidak ada nada bel asli); TONE_CDMA_PIP
+            // yang pendek & bernada tinggi ini yang paling mendekati bunyi "cling" bel sepeda.
+            SoundEvent.TICK -> tg.startTone(ToneGenerator.TONE_CDMA_PIP, 100)
             SoundEvent.LADDER -> tg.startTone(ToneGenerator.TONE_PROP_ACK, 180)
             SoundEvent.SNAKE -> tg.startTone(ToneGenerator.TONE_PROP_NACK, 180)
             SoundEvent.CARD -> tg.startTone(ToneGenerator.TONE_PROP_BEEP2, 150)

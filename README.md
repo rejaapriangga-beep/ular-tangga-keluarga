@@ -4,7 +4,7 @@ Game ular tangga Android untuk dimainkan bersama keluarga — papan klasik denga
 
 ## Konsep
 
-- **Papan ringkas + panel info 3 kolom**: papan 7x14 (7 kotak per baris, 98 kotak total, semua baris tetap tampil tanpa scroll) mengisi bagian atas layar, dengan panel 3 kolom di bawahnya (masing-masing ~sepertiga lebar): kolom kiri **log langkah** (riwayat kejadian semua pemain — naik tangga, kena ular, dapat kartu, dst., terbaru di atas, tiap baris diwarnai sesuai warna pemain yang bersangkutan dengan jarak ekstra saat giliran berganti pemain), kolom tengah **dadu & kartu power-up** (dadu diperkecil agar proporsional dengan kolom), kolom kanan **daftar pemain** (lingkaran inisial karakter + nama + posisi, giliran aktif disorot). Tangga & ular didesain dengan jarak antar kotak yang lebih pendek (maksimal ~3 baris) supaya papan tidak terlihat berantakan, digambar dengan dua rel + anak tangga (bukan garis polos) untuk tangga dan badan menyambung meruncing ke ekor dengan kepala bermata sipit & lidah bercabang untuk ular, plus backdrop vektor bertema di belakang papan. Pion pemain berupa lingkaran warna dengan inisial karakter (bukan emoji kecil) supaya tetap terbaca di papan yang padat. Dadu putih dengan titik (pip) seperti dadu asli, berubah abu-abu otomatis saat bukan giliran pemain tersebut. Tombol kembali & suara jadi ikon melayang transparan di pojok atas, info giliran tampil sebagai popup singkat (bukan bar permanen) setiap kali giliran berganti.
+- **Papan ringkas + panel info 3 kolom**: papan 7x12 (7 kotak per baris, 84 kotak total, semua baris tetap tampil tanpa scroll) mengisi bagian atas layar dengan kotak yang lebih besar (rasio papan lebih landai dari sebelumnya supaya lebih mendekati lebar layar penuh), dengan panel 3 kolom di bawahnya (masing-masing ~sepertiga lebar): kolom kiri **log langkah** (riwayat kejadian semua pemain — naik tangga, kena ular, dapat kartu, dst., terbaru di atas, tiap baris diwarnai sesuai warna pemain yang bersangkutan dengan jarak ekstra saat giliran berganti pemain), kolom tengah **dadu & kartu power-up** (dadu diperkecil agar proporsional dengan kolom), kolom kanan **daftar pemain** (lingkaran inisial karakter + nama + posisi, giliran aktif disorot). Kotak terakhir (finish) diberi pola kotak-kotak hitam putih ala bendera balap. Tangga & ular didesain dengan jarak antar kotak yang lebih pendek (maksimal ~3 baris) supaya papan tidak terlihat berantakan, digambar dengan dua rel + anak tangga (bukan garis polos) untuk tangga dan badan menyambung meruncing ke ekor dengan kepala bermata sipit & lidah bercabang untuk ular, plus backdrop vektor bertema di belakang papan. Pion pemain berupa lingkaran warna dengan inisial karakter (bukan emoji kecil) supaya tetap terbaca di papan yang padat. Dadu putih dengan titik (pip) seperti dadu asli, berubah abu-abu otomatis saat bukan giliran pemain tersebut, dengan efek suara "cling" singkat ala bel sepeda saat dilempar. Tombol kembali & suara jadi ikon melayang transparan di pojok atas, info giliran tampil sebagai popup singkat (bukan bar permanen) setiap kali giliran berganti.
 - **20 karakter pilihan**: hewan (Singa, Panda, Kelinci, Dino, Rubah, Burung Hantu, Harimau, Koala), kerajaan (Raja, Ratu, Ksatria, Penyihir, Peri, Naga), dan profesi (Dokter, Guru, Koki, Polisi, Petani, Astronot) — dipilih per pemain di layar setup, dikelompokkan per kategori. Karakter yang sudah dipilih pemain lain otomatis tidak bisa dipilih pemain lain (unik per pemain dalam satu sesi lokal).
 - **Mekanik modern (Power-Card)**: tiga kartu sederhana yang bisa didapat dari kotak khusus di papan.
   - 🛡️ **Perisai** — otomatis melindungi dari satu gigitan ular berikutnya.
@@ -17,7 +17,7 @@ Game ular tangga Android untuk dimainkan bersama keluarga — papan klasik denga
 ## Status: MVP (Fase 1)
 
 Yang sudah ada di project ini:
-- Papan 7x14 (98 kotak) dengan tangga & ular klasik, animasi pion per kotak.
+- Papan 7x12 (84 kotak) dengan tangga & ular klasik, animasi pion per kotak, pola garis finish di kotak terakhir.
 - Dadu 3D-style dengan animasi putar.
 - Mode lokal pass-and-play 2–4 pemain di satu perangkat, atau vs Bot.
 - Kustomisasi warna pion otomatis dari palet 4 warna.
@@ -32,7 +32,7 @@ Yang sudah ada di project ini:
 - Ritual harian: streak hari main berturut-turut (disimpan di perangkat via `SharedPreferences`), memberi kartu power-card gratis tiap kali app dibuka di hari baru.
 - Mini-game "Tap Cepat" (⚡ kotak spesial): tantangan reflex 3 detik, berhasil = maju 4 langkah, gagal = tidak ada efek buruk.
 - 3 Mode Permainan yang bisa dipilih di layar setup:
-  - 🏁 **Klasik** — pemain pertama sampai kotak 98 menang.
+  - 🏁 **Klasik** — pemain pertama sampai kotak 84 menang.
   - 🤝 **Co-op** — semua pemain bekerja sama, menang bersama saat semua pemain sampai finish.
   - 💥 **Battle Royale Mini** — kotak acak di papan runtuh setiap beberapa giliran; mendarat di kotak yang sudah runtuh membuat pemain terpental kembali ke posisi sebelumnya.
 - **Main Online (v1, room code)**: satu anggota keluarga jadi host, buat room dan dapat kode 5 karakter, anggota lain gabung pakai kode itu dari device masing-masing (tidak perlu akun/login). Real-time sync posisi & giliran lewat Firebase Realtime Database, host-authoritative (hanya device host yang menjalankan logika permainan; device tamu hanya merender & mengirim permintaan lempar dadu).
