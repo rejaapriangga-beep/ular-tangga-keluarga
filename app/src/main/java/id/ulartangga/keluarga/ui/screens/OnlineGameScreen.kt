@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -49,6 +50,7 @@ fun OnlineHostGameScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(Modifier.height(TOP_SPACER_HEIGHT))
             Box(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
@@ -89,7 +91,7 @@ fun OnlineHostGameScreen(
         }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar", modifier = Modifier.size(16.dp))
         }
         RoomCodeBadge(roomCode = roomCode, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
 
@@ -162,6 +164,7 @@ fun OnlineGuestGameScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(Modifier.height(TOP_SPACER_HEIGHT))
             Box(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
@@ -195,7 +198,7 @@ fun OnlineGuestGameScreen(
         }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar", modifier = Modifier.size(16.dp))
         }
         RoomCodeBadge(roomCode = roomCode, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
 

@@ -78,7 +78,9 @@ fun UlarTanggaApp() {
     UlarTanggaTheme(boardTheme = boardTheme) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Box(modifier = Modifier.fillMaxSize()) {
-                ThemeBackdrop(theme = boardTheme, modifier = Modifier.fillMaxSize())
+                if (screen !is AppScreen.Setup) {
+                    ThemeBackdrop(theme = boardTheme, modifier = Modifier.fillMaxSize())
+                }
 
                 when (val current = screen) {
                     is AppScreen.Setup -> SetupScreen(

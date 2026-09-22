@@ -58,7 +58,8 @@ import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-val BOTTOM_PANEL_HEIGHT = 176.dp
+val TOP_SPACER_HEIGHT = 28.dp
+val BOTTOM_PANEL_HEIGHT = 148.dp
 
 @Composable
 fun GameScreen(
@@ -80,6 +81,7 @@ fun GameScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(Modifier.height(TOP_SPACER_HEIGHT))
             Box(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 contentAlignment = Alignment.TopCenter
@@ -118,12 +120,13 @@ fun GameScreen(
         }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar", modifier = Modifier.size(16.dp))
         }
         FloatingIconButton(onClick = onToggleSound, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
             Icon(
                 if (soundOn) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
-                contentDescription = "Suara"
+                contentDescription = "Suara",
+                modifier = Modifier.size(16.dp)
             )
         }
 
@@ -308,7 +311,7 @@ fun FloatingIconButton(onClick: () -> Unit, modifier: Modifier = Modifier, conte
     IconButton(
         onClick = onClick,
         modifier = modifier
-            .size(40.dp)
+            .size(30.dp)
             .background(Color.White.copy(alpha = 0.75f), CircleShape)
     ) {
         content()

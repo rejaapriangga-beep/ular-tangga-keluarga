@@ -6,10 +6,13 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -318,25 +321,36 @@ fun BoardView(
                     label = "piece-${player.id}"
                 )
                 val pieceSizeDp = with(density) { (cellPx * 0.46f).toDp() }
-                Box(
-                    modifier = Modifier
-                        .offset {
-                            IntOffset(
-                                (animated.x - cellPx * 0.23f).roundToInt(),
-                                (animated.y - cellPx * 0.23f).roundToInt()
-                            )
-                        }
-                        .size(pieceSizeDp)
-                        .clip(CircleShape)
-                        .background(player.color)
-                        .border(2.dp, Color.White, CircleShape),
-                    contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier.offset {
+                        IntOffset(
+                            (animated.x - cellPx * 0.23f).roundToInt(),
+                            (animated.y - cellPx * 0.23f).roundToInt()
+                        )
+                    },
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(pieceSizeDp)
+                            .clip(CircleShape)
+                            .background(player.color)
+                            .border(2.dp, Color.White, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = player.avatar.emoji,
+                            fontSize = (pieceSizeDp.value * 0.55f).sp
+                        )
+                    }
                     Text(
                         text = player.avatar.initial.toString(),
-                        fontSize = (pieceSizeDp.value * 0.5f).sp,
+                        fontSize = (pieceSizeDp.value * 0.32f).sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.Black,
+                        modifier = Modifier
+                            .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(3.dp))
+                            .padding(horizontal = 2.dp)
                     )
                 }
             }
