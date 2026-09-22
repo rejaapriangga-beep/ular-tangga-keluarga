@@ -37,6 +37,7 @@ Yang sudah ada di project ini:
 - **Main Online (v1, room code)**: satu anggota keluarga jadi host, buat room dan dapat kode 5 karakter, anggota lain gabung pakai kode itu dari device masing-masing (tidak perlu akun/login). Real-time sync posisi & giliran lewat Firebase Realtime Database, host-authoritative (hanya device host yang menjalankan logika permainan; device tamu hanya merender & mengirim permintaan lempar dadu).
   - **Batasan v1** (sengaja disederhanakan): hanya mode Klasik yang tersedia online (Co-op/Battle Royale belum disinkronkan); kartu Dadu Ganda/Tukar Posisi & mini-game Tap Cepat untuk pemain tamu diproses otomatis oleh sistem (belum ada dialog interaktif lintas-device); tidak ada chat.
   - **Perlu setup manual**: lihat bagian [Setup Firebase untuk Main Online](#setup-firebase-untuk-main-online) di bawah — tanpa ini, tombol Main Online akan menampilkan pesan "belum dikonfigurasi" tapi sisa aplikasi tetap jalan normal.
+- **Web (tamu)**: halaman statis di folder [`web/`](web/) supaya anggota keluarga tanpa Android bisa gabung room lewat browser (kode room yang sama), pakai skema Firebase yang identik dengan app Android. Cara deploy ke VPS sendiri ada di [`web/README.md`](web/README.md).
 
 ## Roadmap (Fase berikutnya)
 

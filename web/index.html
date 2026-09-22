@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Ular Tangga Keluarga — Main Online</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="sign">🐍 Ular Tangga Keluarga — Main Online</header>
+
+    <section id="joinPanel" class="panel">
+      <label>Nama Kamu</label>
+      <input id="nameInput" type="text" placeholder="Nama kamu" maxlength="20" />
+
+      <label>Pilih Karakter</label>
+      <div id="avatarPicker" class="chip-row"></div>
+
+      <label>Kode Room</label>
+      <input id="codeInput" type="text" placeholder="contoh: AB12C" maxlength="6" autocapitalize="characters" />
+
+      <button id="joinBtn">Gabung Room</button>
+      <p id="joinError" class="error"></p>
+    </section>
+
+    <section id="lobbyPanel" class="panel hidden">
+      <h2>Menunggu host memulai...</h2>
+      <p>Kode Room: <strong id="lobbyCode"></strong></p>
+      <ul id="lobbyList"></ul>
+    </section>
+
+    <section id="gamePanel" class="panel hidden">
+      <div class="top-row">
+        <span id="roomCodeLabel"></span>
+        <span id="turnLabel"></span>
+      </div>
+
+      <div id="board"></div>
+
+      <p id="message" class="message"></p>
+
+      <button id="rollBtn" disabled>🎲 Lempar Dadu</button>
+
+      <div id="playersList" class="players-list"></div>
+    </section>
+
+    <div id="winnerOverlay" class="overlay hidden">
+      <div class="overlay-card">
+        <h2 id="winnerText"></h2>
+        <button id="playAgainBtn">Main Lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
