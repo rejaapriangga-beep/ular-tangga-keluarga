@@ -105,7 +105,7 @@ fun BoardView(players: List<Player>, modifier: Modifier = Modifier) {
                     val mid = Offset((a.x + b.x) / 2f + cellPx * 0.6f, (a.y + b.y) / 2f)
                     val path = Path().apply {
                         moveTo(a.x, a.y)
-                        quadraticTo(mid.x, mid.y, b.x, b.y)
+                        quadraticBezierTo(mid.x, mid.y, b.x, b.y)
                     }
                     drawPath(path, color = SnakeColor, style = Stroke(width = cellPx * 0.12f, cap = StrokeCap.Round))
                     drawCircle(color = SnakeColor, radius = cellPx * 0.1f, center = a)
