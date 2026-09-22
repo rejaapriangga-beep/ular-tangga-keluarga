@@ -12,6 +12,16 @@ bersamaan dalam satu room.
 bukan host — logika permainan (dadu, tangga, ular, kartu, dst) tetap
 dijalankan oleh device Android yang jadi host, sama seperti tamu Android.
 
+**Live**: https://gameulartangga.my.id
+
+**Penting — HTTPS wajib, bukan opsional**: browser modern (Chrome dkk) memblokir
+halaman yang diakses lewat HTTP biasa saat mencoba memuat script Firebase SDK
+dari CDN (kebijakan Private Network Access — muncul sebagai error CORS
+"not a secure context" di Console). Kalau belum punya domain, sertifikat
+self-signed sudah cukup (browser akan tampilkan peringatan, tinggal klik
+"Advanced → Proceed", aman untuk pemakaian keluarga sendiri) — lihat langkah
+Certbot di bawah untuk versi dengan domain yang tanpa peringatan sama sekali.
+
 ## Deploy ke VPS (nginx)
 
 Tidak butuh backend/server-side apa pun — cukup file statis yang disajikan
