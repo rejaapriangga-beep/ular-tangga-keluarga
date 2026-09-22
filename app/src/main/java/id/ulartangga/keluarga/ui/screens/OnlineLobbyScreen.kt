@@ -1,6 +1,5 @@
 package id.ulartangga.keluarga.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -229,13 +227,5 @@ private fun PlayerIdentityForm(
         modifier = Modifier.fillMaxWidth()
     )
     Spacer(Modifier.height(8.dp))
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        AnimalAvatar.values().forEach { a ->
-            FilterChip(
-                selected = a == avatar,
-                onClick = { onAvatarChange(a) },
-                label = { Text(a.emoji) }
-            )
-        }
-    }
+    AvatarPicker(selected = avatar, takenAvatars = emptySet(), onSelect = onAvatarChange)
 }

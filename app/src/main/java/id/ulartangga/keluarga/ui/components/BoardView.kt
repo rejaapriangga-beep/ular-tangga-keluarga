@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -198,7 +199,7 @@ fun BoardView(
         modifier = modifier
             .aspectRatio(
                 BoardConfig.COLUMNS.toFloat() / BoardConfig.ROWS.toFloat(),
-                matchHeightConstraintsFirst = false
+                matchHeightConstraintsFirst = true
             )
             .onGloballyPositioned { coords -> boardPx = coords.size.width.toFloat() }
     ) {
@@ -308,7 +309,12 @@ fun BoardView(
                         .border(2.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = player.avatar.emoji, fontSize = (pieceSizeDp.value * 0.62f).sp)
+                    Text(
+                        text = player.avatar.initial.toString(),
+                        fontSize = (pieceSizeDp.value * 0.5f).sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
         }

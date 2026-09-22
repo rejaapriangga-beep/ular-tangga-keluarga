@@ -15,7 +15,23 @@ const AVATARS = [
   { key: "LION", emoji: "🦁", label: "Singa" },
   { key: "PANDA", emoji: "🐼", label: "Panda" },
   { key: "RABBIT", emoji: "🐰", label: "Kelinci" },
-  { key: "DINO", emoji: "🦖", label: "Dino" }
+  { key: "DINO", emoji: "🦖", label: "Dino" },
+  { key: "FOX", emoji: "🦊", label: "Rubah" },
+  { key: "OWL", emoji: "🦉", label: "Burung Hantu" },
+  { key: "TIGER", emoji: "🐯", label: "Harimau" },
+  { key: "KOALA", emoji: "🐨", label: "Koala" },
+  { key: "KING", emoji: "🤴", label: "Raja" },
+  { key: "QUEEN", emoji: "👸", label: "Ratu" },
+  { key: "KNIGHT", emoji: "🗡️", label: "Ksatria" },
+  { key: "WIZARD", emoji: "🧙", label: "Penyihir" },
+  { key: "FAIRY", emoji: "🧚", label: "Peri" },
+  { key: "DRAGON", emoji: "🐉", label: "Naga" },
+  { key: "DOCTOR", emoji: "🧑‍⚕️", label: "Dokter" },
+  { key: "TEACHER", emoji: "🧑‍🏫", label: "Guru" },
+  { key: "CHEF", emoji: "🧑‍🍳", label: "Koki" },
+  { key: "POLICE", emoji: "👮", label: "Polisi" },
+  { key: "FARMER", emoji: "🧑‍🌾", label: "Petani" },
+  { key: "ASTRONAUT", emoji: "👨‍🚀", label: "Astronot" }
 ];
 const COLORS = ["#E53935", "#1E88E5", "#43A047", "#FDD835"];
 
@@ -230,7 +246,7 @@ function renderState(state) {
     token.style.left = (pos.x + jitterX) + "%";
     token.style.top = (pos.y + jitterY) + "%";
     token.style.background = COLORS[lobby.colorIndex % COLORS.length];
-    token.textContent = avatar.emoji;
+    token.textContent = avatar.label.charAt(0).toUpperCase();
     board.appendChild(token);
   });
 

@@ -2,6 +2,7 @@ package id.ulartangga.keluarga.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import id.ulartangga.keluarga.game.AnimalAvatar
+import id.ulartangga.keluarga.game.AvatarCategory
 import id.ulartangga.keluarga.game.GameMode
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.components.WoodenSign
@@ -111,6 +113,10 @@ fun SetupScreen(
 
         (0 until playerCount).forEach { i ->
             val isBot = vsBot && i == playerCount - 1
+            val takenByOthers = (0 until playerCount)
+                .filter { it != i }
+                .map { playerAvatars.value[it] }
+                .toSet()
             PlayerEditorRow(
                 index = i,
                 name = playerNames.value[i],
@@ -118,6 +124,7 @@ fun SetupScreen(
                     playerNames.value = playerNames.value.toMutableList().also { it[i] = newName }
                 },
                 avatar = playerAvatars.value[i],
+                takenAvatars = takenByOthers,
                 onAvatarChange = { newAvatar ->
                     playerAvatars.value = playerAvatars.value.toMutableList().also { it[i] = newAvatar }
                 },
@@ -163,6 +170,7 @@ private fun PlayerEditorRow(
     name: String,
     onNameChange: (String) -> Unit,
     avatar: AnimalAvatar,
+    takenAvatars: Set<AnimalAvatar>,
     onAvatarChange: (AnimalAvatar) -> Unit,
     isBot: Boolean,
     isYoung: Boolean,
@@ -183,21 +191,40 @@ private fun PlayerEditorRow(
 
         Spacer(Modifier.height(4.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            AnimalAvatar.values().forEach { a ->
-                FilterChip(
-                    selected = a == avatar,
-                    onClick = { onAvatarChange(a) },
-                    label = { Text(a.emoji) }
-                )
-            }
-        }
+        AvatarPicker(selected = avatar, takenAvatars = takenAvatars, onSelect = onAvatarChange)
 
         if (!isBot) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = isYoung, onCheckedChange = onYoungChange)
                 Text("Pemain Muda (mulai dengan Perisai, hoki Kotak Misteri lebih baik)", style = MaterialTheme.typography.labelSmall)
             }
+        }
+    }
+}
+
+/** Pemilih karakter (hewan/kerajaan/profesi), dikelompokkan per kategori. Karakter yang sudah dipakai pemain lain tidak bisa dipilih. */
+@Composable
+fun AvatarPicker(
+    selected: AnimalAvatar,
+    takenAvatars: Set<AnimalAvatar>,
+    onSelect: (AnimalAvatar) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        AvatarCategory.values().forEach { category ->
+            Text(category.label, style = MaterialTheme.typography.labelSmall)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                AnimalAvatar.values().filter { it.category == category }.forEach { a ->
+                    val takenByOther = a in takenAvatars && a != selected
+                    FilterChip(
+                        selected = a == selected,
+                        enabled = !takenByOther,
+                        onClick = { onSelect(a) },
+                        label = { Text("${a.emoji} ${a.label}") }
+                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
         }
     }
 }

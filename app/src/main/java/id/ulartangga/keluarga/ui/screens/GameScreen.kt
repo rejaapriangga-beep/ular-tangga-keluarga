@@ -1,8 +1,11 @@
 package id.ulartangga.keluarga.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,11 +34,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.game.GameEngine
@@ -46,6 +54,7 @@ import id.ulartangga.keluarga.ui.components.DiceView
 import id.ulartangga.keluarga.ui.components.MiniGameDialog
 import id.ulartangga.keluarga.ui.components.WoodenSign
 import id.ulartangga.keluarga.ui.theme.BoardTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -71,19 +80,13 @@ fun GameScreen(
         ) {
             TopBar(onExit = onExit, soundOn = soundOn, onToggleSound = onToggleSound)
             Spacer(Modifier.height(6.dp))
-            TurnIndicator(currentPlayer = engine.currentPlayer)
-            Spacer(Modifier.height(6.dp))
             PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
             Spacer(Modifier.height(6.dp))
-            val boardScrollState = rememberScrollState()
-            LaunchedEffect(boardScrollState.maxValue) {
-                if (boardScrollState.maxValue > 0) boardScrollState.scrollTo(boardScrollState.maxValue)
-            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(boardScrollState)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
             ) {
                 BoardView(
                     players = engine.players,
@@ -139,6 +142,14 @@ fun GameScreen(
                 Text("Dadu Ganda aktif!", color = MaterialTheme.colorScheme.tertiary)
             }
         }
+
+        TurnPopup(
+            turnKey = engine.turnToken,
+            currentPlayer = engine.currentPlayer,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 64.dp)
+        )
 
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
@@ -211,7 +222,12 @@ fun PlayersRow(players: List<Player>, currentPlayer: Player) {
                         .background(player.color),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(player.avatar.emoji, fontSize = 16.sp)
+                    Text(
+                        player.avatar.initial.toString(),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
                 Text(player.name, style = MaterialTheme.typography.labelSmall)
                 Text(
@@ -227,9 +243,8 @@ fun PlayersRow(players: List<Player>, currentPlayer: Player) {
 fun TurnIndicator(currentPlayer: Player, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(currentPlayer.color.copy(alpha = 0.9f))
+            .background(currentPlayer.color.copy(alpha = 0.95f))
             .padding(horizontal = 14.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -241,7 +256,12 @@ fun TurnIndicator(currentPlayer: Player, modifier: Modifier = Modifier) {
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
-            Text(currentPlayer.avatar.emoji, fontSize = 17.sp)
+            Text(
+                currentPlayer.avatar.initial.toString(),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = currentPlayer.color
+            )
         }
         Spacer(Modifier.width(8.dp))
         Text(
@@ -249,6 +269,25 @@ fun TurnIndicator(currentPlayer: Player, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleMedium,
             color = Color.White
         )
+    }
+}
+
+/** Info giliran ditampilkan sebagai popup singkat (bukan bar permanen) supaya papan mendapat ruang vertikal lebih. */
+@Composable
+fun TurnPopup(turnKey: Any?, currentPlayer: Player, modifier: Modifier = Modifier) {
+    var visible by remember { mutableStateOf(true) }
+    LaunchedEffect(turnKey) {
+        visible = true
+        delay(1600)
+        visible = false
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically(initialOffsetY = { -it / 2 }),
+        exit = fadeOut(),
+        modifier = modifier
+    ) {
+        TurnIndicator(currentPlayer = currentPlayer)
     }
 }
 

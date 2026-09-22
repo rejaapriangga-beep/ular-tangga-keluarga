@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -21,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,21 +65,14 @@ fun OnlineHostGameScreen(
             }
             Spacer(Modifier.height(6.dp))
 
-            TurnIndicator(currentPlayer = engine.currentPlayer)
-            Spacer(Modifier.height(6.dp))
-
             PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
             Spacer(Modifier.height(6.dp))
 
-            val boardScrollState = rememberScrollState()
-            LaunchedEffect(boardScrollState.maxValue) {
-                if (boardScrollState.maxValue > 0) boardScrollState.scrollTo(boardScrollState.maxValue)
-            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(boardScrollState)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
             ) {
                 BoardView(
                     players = engine.players,
@@ -138,6 +128,14 @@ fun OnlineHostGameScreen(
                 Text("Menunggu ${current.name} melempar dadu...", style = MaterialTheme.typography.bodyMedium)
             }
         }
+
+        TurnPopup(
+            turnKey = engine.turnToken,
+            currentPlayer = engine.currentPlayer,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 64.dp)
+        )
 
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
@@ -196,21 +194,15 @@ fun OnlineGuestGameScreen(
             Spacer(Modifier.height(6.dp))
 
             if (current != null) {
-                TurnIndicator(currentPlayer = current)
-                Spacer(Modifier.height(6.dp))
                 PlayersRow(players = controller.players, currentPlayer = current)
                 Spacer(Modifier.height(6.dp))
             }
 
-            val boardScrollState = rememberScrollState()
-            LaunchedEffect(boardScrollState.maxValue) {
-                if (boardScrollState.maxValue > 0) boardScrollState.scrollTo(boardScrollState.maxValue)
-            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(boardScrollState)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
             ) {
                 BoardView(
                     players = controller.players,
@@ -246,6 +238,16 @@ fun OnlineGuestGameScreen(
                 Spacer(Modifier.height(6.dp))
                 Text("Menunggu ${current?.name ?: "pemain lain"} melempar dadu...", style = MaterialTheme.typography.bodyMedium)
             }
+        }
+
+        if (current != null) {
+            TurnPopup(
+                turnKey = controller.currentDeviceId,
+                currentPlayer = current,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 64.dp)
+            )
         }
 
         controller.winnerDeviceId?.let { winnerId ->
