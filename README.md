@@ -12,7 +12,7 @@ Game ular tangga Android untuk dimainkan bersama keluarga — papan klasik denga
   - 🔁 **Tukar Posisi** — tukar posisi dengan pemain lain, aktifkan sebelum melempar dadu.
 - **Mode lawan Bot**: cocok untuk main berdua dengan anak saat anggota keluarga lain belum siap; bot melempar dadu otomatis dan cukup pintar memakai kartu Tukar Posisi/Dadu Ganda saat tertinggal.
 - **Suara ringan**: efek bunyi sederhana (nada dadu, naik tangga, kena ular, kartu, menang) lewat `ToneGenerator`, bisa dimatikan dari tombol suara di layar permainan.
-- **3 tema visual**: 🌿 Hutan Tropis, 🏙️ Kota Malam (neon), 🪐 Luar Angkasa — dipilih di layar setup dengan preview warna langsung ke seluruh aplikasi (papan, tombol, dadu).
+- **Layar setup ringkas**: semua pilihan (mode permainan, jumlah pemain, karakter per pemain) memakai dropdown, bukan baris tombol/slider, supaya layar setup lebih rapi dan singkat. Tidak ada lagi pemilihan tema visual — aplikasi memakai satu tema visual (Hutan Tropis) secara konsisten.
 
 ## Status: MVP (Fase 1)
 
@@ -23,7 +23,7 @@ Yang sudah ada di project ini:
 - Kustomisasi warna pion otomatis dari palet 4 warna.
 - 3 power-card dasar (Perisai, Dadu Ganda, Tukar Posisi).
 - Toggle suara on/off.
-- 3 tema visual yang bisa dipilih di layar setup (Hutan Tropis, Kota Malam, Luar Angkasa).
+- Layar setup dengan dropdown untuk mode permainan, jumlah pemain, dan karakter per pemain.
 - Kotak Misteri (efek acak: maju/mundur 5 langkah, dapat kartu, tukar posisi acak, atau tidak ada efek).
 - Combo/Streak: dadu kembar dua kali berturut-turut untuk pemain yang sama memberi giliran ekstra.
 - 20 karakter pilihan (hewan/kerajaan/profesi) dengan pion bertanda inisial, papan nama kayu untuk judul, dan backdrop vektor bertema di belakang papan.
@@ -68,7 +68,7 @@ app/src/main/java/id/ulartangga/keluarga/
 ├── sound/
 │   └── SoundManager.kt           # Efek suara sederhana via ToneGenerator
 └── ui/
-    ├── theme/                    # BoardTheme (3 tema visual), tipografi Material3
+    ├── theme/                    # BoardTheme (dipakai tetap: Hutan Tropis), tipografi Material3
     ├── components/                # BoardView, DiceView, MiniGameDialog, WoodenSign, dst.
     └── screens/                   # SetupScreen, GameScreen, OnlineLobbyScreen, OnlineGameScreen
 ```

@@ -1,9 +1,6 @@
 package id.ulartangga.keluarga.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +11,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,14 +33,10 @@ import id.ulartangga.keluarga.game.AvatarCategory
 import id.ulartangga.keluarga.game.GameMode
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.components.WoodenSign
-import id.ulartangga.keluarga.ui.theme.BoardTheme
 import id.ulartangga.keluarga.ui.theme.PlayerPalette
-import kotlin.math.roundToInt
 
 @Composable
 fun SetupScreen(
-    selectedTheme: BoardTheme,
-    onThemeChange: (BoardTheme) -> Unit,
     onStart: (List<Player>, GameMode) -> Unit,
     onPlayOnline: () -> Unit
 ) {
@@ -57,47 +53,32 @@ fun SetupScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         WoodenSign(text = "Ular Tangga — Petualangan Keluarga", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
 
-        Text("Pilih Tema")
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            BoardTheme.values().forEach { theme ->
-                FilterChip(
-                    selected = theme == selectedTheme,
-                    onClick = { onThemeChange(theme) },
-                    label = { Text("${theme.emoji} ${theme.label}") }
-                )
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        Text("Mode Permainan")
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            GameMode.values().forEach { mode ->
-                FilterChip(
-                    selected = mode == selectedMode,
-                    onClick = { selectedMode = mode },
-                    label = { Text("${mode.emoji} ${mode.label}") }
-                )
-            }
-        }
+        DropdownField(
+            label = "Mode Permainan",
+            selected = selectedMode,
+            options = GameMode.values().toList(),
+            optionLabel = { "${it.emoji} ${it.label}" },
+            onSelect = { selectedMode = it },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(Modifier.height(4.dp))
         Text(selectedMode.description, style = MaterialTheme.typography.labelSmall)
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Text("Jumlah Pemain: $playerCount")
-        Slider(
-            value = playerCount.toFloat(),
-            onValueChange = { playerCount = it.roundToInt() },
-            valueRange = 2f..4f,
-            steps = 1
+        DropdownField(
+            label = "Jumlah Pemain",
+            selected = playerCount,
+            options = listOf(2, 3, 4),
+            optionLabel = { it.toString() },
+            onSelect = { playerCount = it },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(12.dp))
@@ -107,7 +88,7 @@ fun SetupScreen(
             Text("Pemain terakhir adalah Bot")
         }
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
 
         Text("Pemain")
         Spacer(Modifier.height(8.dp))
@@ -138,7 +119,7 @@ fun SetupScreen(
             Spacer(Modifier.height(8.dp))
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         Button(onClick = {
             val players = (0 until playerCount).map { i ->
@@ -190,9 +171,14 @@ private fun PlayerEditorRow(
             )
         }
 
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(6.dp))
 
-        AvatarPicker(selected = avatar, takenAvatars = takenAvatars, onSelect = onAvatarChange)
+        AvatarDropdown(
+            selected = avatar,
+            takenAvatars = takenAvatars,
+            onSelect = onAvatarChange,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         if (!isBot) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -203,30 +189,94 @@ private fun PlayerEditorRow(
     }
 }
 
-/** Pemilih karakter (hewan/kerajaan/profesi), dikelompokkan per kategori. Karakter yang sudah dipakai pemain lain tidak bisa dipilih. */
-@OptIn(ExperimentalLayoutApi::class)
+/** Dropdown pilihan generik: label, nilai terpilih, dan daftar opsi. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AvatarPicker(
+fun <T> DropdownField(
+    label: String,
+    selected: T,
+    options: List<T>,
+    optionLabel: (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = optionLabel(selected),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(optionLabel(option)) },
+                    onClick = {
+                        onSelect(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+/** Dropdown pemilih karakter (hewan/kerajaan/profesi), dikelompokkan per kategori. Karakter yang sudah dipakai pemain lain tidak bisa dipilih. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AvatarDropdown(
     selected: AnimalAvatar,
     takenAvatars: Set<AnimalAvatar>,
     onSelect: (AnimalAvatar) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        AvatarCategory.values().forEach { category ->
-            Text(category.label, style = MaterialTheme.typography.labelSmall)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    var expanded by remember { mutableStateOf(false) }
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = "${selected.emoji} ${selected.label}",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Karakter") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AvatarCategory.values().forEach { category ->
+                Text(
+                    category.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
                 AnimalAvatar.values().filter { it.category == category }.forEach { a ->
-                    val takenByOther = a in takenAvatars && a != selected
-                    FilterChip(
-                        selected = a == selected,
-                        enabled = !takenByOther,
-                        onClick = { onSelect(a) },
-                        label = { Text("${a.emoji} ${a.label}") }
+                    val disabled = a in takenAvatars && a != selected
+                    DropdownMenuItem(
+                        text = { Text("${a.emoji} ${a.label}") },
+                        enabled = !disabled,
+                        onClick = {
+                            onSelect(a)
+                            expanded = false
+                        }
                     )
                 }
             }
-            Spacer(Modifier.height(4.dp))
         }
     }
 }

@@ -227,5 +227,10 @@ private fun PlayerIdentityForm(
         modifier = Modifier.fillMaxWidth()
     )
     Spacer(Modifier.height(8.dp))
-    AvatarPicker(selected = avatar, takenAvatars = emptySet(), onSelect = onAvatarChange)
+    AvatarDropdown(
+        selected = avatar,
+        takenAvatars = emptySet(),
+        onSelect = onAvatarChange,
+        modifier = Modifier.fillMaxWidth()
+    )
 }

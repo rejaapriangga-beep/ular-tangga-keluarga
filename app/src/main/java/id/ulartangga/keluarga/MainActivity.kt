@@ -57,7 +57,7 @@ private sealed class AppScreen {
 fun UlarTanggaApp() {
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Setup) }
     var soundOn by remember { mutableStateOf(true) }
-    var boardTheme by remember { mutableStateOf(BoardTheme.FOREST) }
+    val boardTheme = BoardTheme.FOREST
     val soundManager = remember { SoundManager() }
 
     val context = LocalContext.current
@@ -82,8 +82,6 @@ fun UlarTanggaApp() {
 
                 when (val current = screen) {
                     is AppScreen.Setup -> SetupScreen(
-                        selectedTheme = boardTheme,
-                        onThemeChange = { boardTheme = it },
                         onStart = { players, mode ->
                             pendingBonusCard?.let { card ->
                                 val recipient = players.firstOrNull { !it.isBot }
