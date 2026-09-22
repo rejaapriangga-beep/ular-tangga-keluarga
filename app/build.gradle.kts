@@ -15,10 +15,25 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // Keystore debug tetap (dicommit ke repo) supaya setiap build CI
+            // punya tanda tangan yang sama, sehingga update APK di HP tidak
+            // pernah gagal dengan error "conflicts with existing package".
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
