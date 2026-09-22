@@ -73,6 +73,7 @@ fun GameScreen(
             BoardView(
                 players = engine.players,
                 theme = theme,
+                collapsedCells = engine.collapsedCells,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)
@@ -85,7 +86,8 @@ fun GameScreen(
             }
 
             val current = engine.currentPlayer
-            val canAct = !engine.isBusy && engine.winner == null && !current.isBot
+            val canAct = !engine.isBusy && engine.winner == null && !engine.coopComplete &&
+                !current.isBot && !current.finished
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -128,6 +130,10 @@ fun GameScreen(
 
         engine.winner?.let { winner ->
             WinnerDialog(winner = winner, onPlayAgain = onExit)
+        }
+
+        if (engine.coopComplete) {
+            CoopCompleteDialog(onPlayAgain = onExit)
         }
     }
 }
@@ -181,7 +187,10 @@ private fun PlayersRow(players: List<Player>, currentPlayer: Player) {
                     Text(player.avatar.emoji, fontSize = 16.sp)
                 }
                 Text(player.name, style = MaterialTheme.typography.labelSmall)
-                Text("#${player.position}", style = MaterialTheme.typography.labelSmall)
+                Text(
+                    if (player.finished) "🏁 Selesai" else "#${player.position}",
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
         }
     }
@@ -244,5 +253,17 @@ private fun WinnerDialog(winner: Player, onPlayAgain: () -> Unit) {
         },
         title = { Text("Selamat!") },
         text = { Text("${winner.name} menang!") }
+    )
+}
+
+@Composable
+private fun CoopCompleteDialog(onPlayAgain: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = {},
+        confirmButton = {
+            TextButton(onClick = onPlayAgain) { Text("Main Lagi") }
+        },
+        title = { Text("🎉 Semua Sampai Finish!") },
+        text = { Text("Kerja tim keluarga yang hebat! Semua pemain berhasil menyelesaikan papan bersama-sama.") }
     )
 }

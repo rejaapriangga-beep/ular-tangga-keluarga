@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import id.ulartangga.keluarga.game.AnimalAvatar
+import id.ulartangga.keluarga.game.GameMode
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.components.WoodenSign
 import id.ulartangga.keluarga.ui.theme.BoardTheme
@@ -36,10 +37,11 @@ import kotlin.math.roundToInt
 fun SetupScreen(
     selectedTheme: BoardTheme,
     onThemeChange: (BoardTheme) -> Unit,
-    onStart: (List<Player>) -> Unit
+    onStart: (List<Player>, GameMode) -> Unit
 ) {
     var playerCount by remember { mutableStateOf(2) }
     var vsBot by remember { mutableStateOf(true) }
+    var selectedMode by remember { mutableStateOf(GameMode.CLASSIC) }
     val playerNames = remember { mutableStateOf(listOf("Pemain 1", "Pemain 2", "Pemain 3", "Pemain 4")) }
     val playerAvatars = remember {
         mutableStateOf(listOf(AnimalAvatar.LION, AnimalAvatar.PANDA, AnimalAvatar.RABBIT, AnimalAvatar.DINO))
@@ -67,6 +69,21 @@ fun SetupScreen(
                 )
             }
         }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text("Mode Permainan")
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            GameMode.values().forEach { mode ->
+                FilterChip(
+                    selected = mode == selectedMode,
+                    onClick = { selectedMode = mode },
+                    label = { Text("${mode.emoji} ${mode.label}") }
+                )
+            }
+        }
+        Text(selectedMode.description, style = MaterialTheme.typography.labelSmall)
 
         Spacer(Modifier.height(24.dp))
 
@@ -125,7 +142,7 @@ fun SetupScreen(
                     isYoungPlayer = !isBot && youngFlags.value[i]
                 )
             }
-            onStart(players)
+            onStart(players, selectedMode)
         }) {
             Text("Mulai Bermain")
         }

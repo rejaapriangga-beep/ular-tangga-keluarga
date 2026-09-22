@@ -1,6 +1,7 @@
 package id.ulartangga.keluarga.game
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import id.ulartangga.keluarga.sound.SoundEvent
@@ -10,6 +11,7 @@ import kotlinx.coroutines.delay
 
 class GameEngine(
     val players: List<Player>,
+    val mode: GameMode = GameMode.CLASSIC,
     private val onSound: (SoundEvent) -> Unit = {}
 ) {
     var currentPlayerIndex by mutableStateOf(0)
@@ -22,6 +24,8 @@ class GameEngine(
         private set
     var winner by mutableStateOf<Player?>(null)
         private set
+    var coopComplete by mutableStateOf(false)
+        private set
     var doubleDiceActive by mutableStateOf(false)
         private set
     var message by mutableStateOf<String?>(null)
@@ -30,21 +34,24 @@ class GameEngine(
         private set
     var miniGameRequest by mutableStateOf<MiniGameRequest?>(null)
         private set
+    val collapsedCells = mutableStateListOf<Int>()
+    private var totalTurns = 0
 
     val currentPlayer: Player get() = players[currentPlayerIndex]
+    private val isGameOver: Boolean get() = winner != null || coopComplete
 
     fun resolveMiniGame(success: Boolean) {
         miniGameRequest?.deferred?.complete(success)
     }
 
     fun activateDoubleDice() {
-        if (!isBusy && winner == null && currentPlayer.cards.remove(PowerCardType.DOUBLE_DICE)) {
+        if (!isBusy && !isGameOver && currentPlayer.cards.remove(PowerCardType.DOUBLE_DICE)) {
             doubleDiceActive = true
         }
     }
 
     fun beginSwap() {
-        if (!isBusy && winner == null && currentPlayer.cards.contains(PowerCardType.SWAP)) {
+        if (!isBusy && !isGameOver && currentPlayer.cards.contains(PowerCardType.SWAP)) {
             awaitingSwapTarget = true
         }
     }
@@ -72,7 +79,7 @@ class GameEngine(
     }
 
     suspend fun rollDice() {
-        if (isBusy || winner != null) return
+        if (isBusy || isGameOver) return
         val player = currentPlayer
         isBusy = true
         message = null
@@ -91,18 +98,29 @@ class GameEngine(
         val start = player.position
         val target = (start + finalRoll).coerceAtMost(100)
 
+        if (mode == GameMode.BATTLE_ROYALE && target in collapsedCells) {
+            for (cell in (start + 1)..target) {
+                player.animatedCell = cell
+                delay(120)
+            }
+            delay(150)
+            for (cell in target downTo start) {
+                player.animatedCell = cell
+                delay(90)
+            }
+            message = "💥 Kotak $target runtuh! ${player.name} terpental kembali ke $start."
+            onSound(SoundEvent.SNAKE)
+            advanceTurn(isCombo)
+            return
+        }
+
         for (cell in (start + 1)..target) {
             player.animatedCell = cell
             delay(180)
         }
         player.position = target
 
-        if (target == 100) {
-            onSound(SoundEvent.WIN)
-            winner = player
-            isBusy = false
-            return
-        }
+        if (finishTurnIfWon(player)) return
 
         if (target in BoardConfig.cardCells && player.cards.size < 3) {
             val newCard = PowerCardType.values().random()
@@ -118,12 +136,7 @@ class GameEngine(
             delay(400)
         }
 
-        if (player.position == 100) {
-            onSound(SoundEvent.WIN)
-            winner = player
-            isBusy = false
-            return
-        }
+        if (finishTurnIfWon(player)) return
 
         var miniGameMoved = false
         if (target in BoardConfig.miniGameCells) {
@@ -149,12 +162,7 @@ class GameEngine(
             delay(400)
         }
 
-        if (player.position == 100) {
-            onSound(SoundEvent.WIN)
-            winner = player
-            isBusy = false
-            return
-        }
+        if (finishTurnIfWon(player)) return
 
         if (!mysteryMoved && !miniGameMoved) {
             BoardConfig.ladders[target]?.let { end ->
@@ -181,21 +189,68 @@ class GameEngine(
             }
         }
 
-        if (player.position == 100) {
-            onSound(SoundEvent.WIN)
-            winner = player
-            isBusy = false
-            return
-        }
+        if (finishTurnIfWon(player)) return
 
+        advanceTurn(isCombo)
+    }
+
+    /** Menutup giliran: proses combo/lanjut giliran, jalankan erosi papan Battle Royale, lalu buka giliran berikutnya. */
+    private fun advanceTurn(isCombo: Boolean) {
         if (isCombo) {
-            message = (message?.let { "$it " } ?: "") + "🔥 Dadu kembar! ${player.name} dapat giliran ekstra!"
+            message = (message?.let { "$it " } ?: "") + "🔥 Dadu kembar! ${currentPlayer.name} dapat giliran ekstra!"
             onSound(SoundEvent.CARD)
         } else {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+            currentPlayerIndex = nextPlayerIndex(currentPlayerIndex)
         }
+        maybeCollapseCell()
         turnToken++
         isBusy = false
+    }
+
+    /** Mengembalikan true jika giliran sudah ditutup di sini (pemain menang / finish) sehingga rollDice() harus berhenti. */
+    private fun finishTurnIfWon(player: Player): Boolean {
+        if (player.position != 100) return false
+        onSound(SoundEvent.WIN)
+        if (mode == GameMode.COOP) {
+            if (!player.finished) {
+                player.finished = true
+                message = "🎉 ${player.name} sampai finish!"
+            }
+            if (players.all { it.finished }) {
+                coopComplete = true
+                isBusy = false
+                return true
+            }
+            currentPlayerIndex = nextPlayerIndex(currentPlayerIndex)
+            turnToken++
+            isBusy = false
+            return true
+        }
+        winner = player
+        isBusy = false
+        return true
+    }
+
+    private fun nextPlayerIndex(from: Int): Int {
+        var idx = from
+        do {
+            idx = (idx + 1) % players.size
+        } while (mode == GameMode.COOP && players[idx].finished && players.any { !it.finished })
+        return idx
+    }
+
+    private fun maybeCollapseCell() {
+        if (mode != GameMode.BATTLE_ROYALE) return
+        totalTurns++
+        if (totalTurns % 4 != 0) return
+        val occupied = players.map { it.position }.toSet()
+        val reserved = BoardConfig.ladders.keys + BoardConfig.ladders.values +
+            BoardConfig.snakes.keys + BoardConfig.snakes.values +
+            BoardConfig.cardCells + BoardConfig.mysteryCells + BoardConfig.miniGameCells +
+            collapsedCells.toSet() + occupied + setOf(1, 100)
+        val candidate = (2..99).filter { it !in reserved }.randomOrNull() ?: return
+        collapsedCells.add(candidate)
+        message = (message?.let { "$it " } ?: "") + "⚠️ Kotak $candidate mulai retak dan runtuh!"
     }
 
     /** Mengembalikan true jika posisi pemain berpindah akibat efek Kotak Misteri. */
@@ -257,7 +312,7 @@ class GameEngine(
 
     suspend fun botTakeTurnIfNeeded() {
         val player = currentPlayer
-        if (!player.isBot || isBusy || winner != null) return
+        if (!player.isBot || isBusy || isGameOver || player.finished) return
         delay(700)
 
         val leader = players.filter { it !== player }.maxByOrNull { it.position }

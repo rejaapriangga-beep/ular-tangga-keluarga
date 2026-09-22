@@ -51,7 +51,12 @@ private fun cellGeometry(cell: Int, cellPx: Float): CellGeometry {
 private fun cellCenter(cell: Int, cellPx: Float) = cellGeometry(cell, cellPx).center
 
 @Composable
-fun BoardView(players: List<Player>, theme: BoardTheme, modifier: Modifier = Modifier) {
+fun BoardView(
+    players: List<Player>,
+    theme: BoardTheme,
+    modifier: Modifier = Modifier,
+    collapsedCells: List<Int> = emptyList()
+) {
     var boardPx by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
     val textColor = android.graphics.Color.argb(
@@ -104,6 +109,23 @@ fun BoardView(players: List<Player>, theme: BoardTheme, modifier: Modifier = Mod
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.WHITE
                                 textSize = cellPx * 0.2f
+                                isFakeBoldText = true
+                            }
+                        )
+                    }
+                    if (cell in collapsedCells) {
+                        drawRect(
+                            color = Color(0xAA1A1A1A),
+                            topLeft = topLeft,
+                            size = Size(cellPx, cellPx)
+                        )
+                        drawContext.canvas.nativeCanvas.drawText(
+                            "✕",
+                            geo.center.x - cellPx * 0.08f,
+                            geo.center.y + cellPx * 0.08f,
+                            android.graphics.Paint().apply {
+                                color = android.graphics.Color.RED
+                                textSize = cellPx * 0.28f
                                 isFakeBoldText = true
                             }
                         )

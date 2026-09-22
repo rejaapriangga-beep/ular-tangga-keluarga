@@ -17,6 +17,7 @@ class Player(
     var position by mutableStateOf(1)
     var animatedCell by mutableStateOf(1)
     var lastRoll by mutableStateOf(0)
+    var finished by mutableStateOf(false)
     val cards = mutableStateListOf<PowerCardType>()
 
     init {

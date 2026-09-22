@@ -30,10 +30,13 @@ Yang sudah ada di project ini:
 - Mode "Pemain Muda": pemain yang ditandai mulai dengan kartu Perisai gratis dan Kotak Misteri tidak akan memberi efek mundur — bikin permainan lintas usia lebih seimbang.
 - Ritual harian: streak hari main berturut-turut (disimpan di perangkat via `SharedPreferences`), memberi kartu power-card gratis tiap kali app dibuka di hari baru.
 - Mini-game "Tap Cepat" (⚡ kotak spesial): tantangan reflex 3 detik, berhasil = maju 4 langkah, gagal = tidak ada efek buruk.
+- 3 Mode Permainan yang bisa dipilih di layar setup:
+  - 🏁 **Klasik** — pemain pertama sampai kotak 100 menang.
+  - 🤝 **Co-op** — semua pemain bekerja sama, menang bersama saat semua pemain sampai finish.
+  - 💥 **Battle Royale Mini** — kotak acak di papan runtuh setiap beberapa giliran; mendarat di kotak yang sudah runtuh membuat pemain terpental kembali ke posisi sebelumnya.
 
 ## Roadmap (Fase berikutnya)
 
-- Mode Co-op dan Battle Royale Mini.
 - Replay/highlight akhir permainan yang bisa dibagikan.
 - Multiplayer online.
 

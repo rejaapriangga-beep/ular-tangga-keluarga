@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import id.ulartangga.keluarga.data.DailyRewardManager
 import id.ulartangga.keluarga.game.GameEngine
+import id.ulartangga.keluarga.game.GameMode
 import id.ulartangga.keluarga.game.PowerCardType
 import id.ulartangga.keluarga.sound.SoundManager
 import id.ulartangga.keluarga.ui.components.ThemeBackdrop
@@ -68,7 +69,7 @@ fun UlarTanggaApp() {
                     SetupScreen(
                         selectedTheme = boardTheme,
                         onThemeChange = { boardTheme = it },
-                        onStart = { players ->
+                        onStart = { players, mode ->
                             pendingBonusCard?.let { card ->
                                 val recipient = players.firstOrNull { !it.isBot }
                                 if (recipient != null && recipient.cards.size < 3) {
@@ -76,7 +77,7 @@ fun UlarTanggaApp() {
                                 }
                                 pendingBonusCard = null
                             }
-                            engine = GameEngine(players) { event ->
+                            engine = GameEngine(players, mode) { event ->
                                 if (soundOn) soundManager.play(event)
                             }
                         }
