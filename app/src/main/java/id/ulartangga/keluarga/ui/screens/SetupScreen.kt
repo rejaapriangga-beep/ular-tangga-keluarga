@@ -21,7 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import id.ulartangga.keluarga.game.AnimalAvatar
 import id.ulartangga.keluarga.game.Player
+import id.ulartangga.keluarga.ui.components.WoodenSign
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import id.ulartangga.keluarga.ui.theme.PlayerPalette
 import kotlin.math.roundToInt
@@ -41,7 +44,7 @@ fun SetupScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Ular Tangga Keluarga", style = MaterialTheme.typography.headlineMedium)
+        WoodenSign(text = "Ular Tangga — Petualangan Keluarga", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
 
         Text("Pilih Tema")
@@ -73,6 +76,19 @@ fun SetupScreen(
             Text("Pemain terakhir adalah Bot")
         }
 
+        Spacer(Modifier.height(20.dp))
+
+        Text("Token Karakter")
+        Spacer(Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            AnimalAvatar.values().forEach { avatar ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(avatar.emoji, fontSize = 28.sp)
+                    Text(avatar.label, style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
+
         Spacer(Modifier.height(24.dp))
 
         Button(onClick = {
@@ -82,6 +98,7 @@ fun SetupScreen(
                     id = i,
                     name = if (isBot) "Bot" else "Pemain ${i + 1}",
                     color = PlayerPalette[i % PlayerPalette.size],
+                    avatar = AnimalAvatar.values()[i % AnimalAvatar.values().size],
                     isBot = isBot
                 )
             }

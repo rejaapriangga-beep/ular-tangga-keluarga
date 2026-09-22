@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -28,6 +30,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.game.BoardConfig
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.theme.BoardTheme
@@ -134,20 +137,23 @@ fun BoardView(players: List<Player>, theme: BoardTheme, modifier: Modifier = Mod
                     animationSpec = tween(220),
                     label = "piece-${player.id}"
                 )
-                val pieceSizeDp = with(density) { (cellPx * 0.32f).toDp() }
+                val pieceSizeDp = with(density) { (cellPx * 0.34f).toDp() }
                 Box(
                     modifier = Modifier
                         .offset {
                             IntOffset(
-                                (animated.x - cellPx * 0.16f).roundToInt(),
-                                (animated.y - cellPx * 0.16f).roundToInt()
+                                (animated.x - cellPx * 0.17f).roundToInt(),
+                                (animated.y - cellPx * 0.17f).roundToInt()
                             )
                         }
                         .size(pieceSizeDp)
                         .clip(CircleShape)
                         .background(player.color)
-                        .border(2.dp, Color.White, CircleShape)
-                )
+                        .border(2.dp, Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = player.avatar.emoji, fontSize = (pieceSizeDp.value * 0.6f).sp)
+                }
             }
         }
     }

@@ -4,7 +4,7 @@ Game ular tangga Android untuk dimainkan bersama keluarga — papan klasik denga
 
 ## Konsep
 
-- **Papan hangat & hidup**: papan 10x10 dengan checkerboard warna hijau lembut, tangga digambar sebagai balok oranye, ular sebagai garis lengkung merah. Pion pemain berupa lingkaran berwarna yang berpindah dengan animasi halus per kotak (bukan lompat kaku).
+- **Papan hangat & hidup**: papan 10x10 dengan checkerboard warna hijau lembut, tangga digambar sebagai balok oranye, ular sebagai garis lengkung merah, dan backdrop vektor bertema (bukit & pohon di Hutan Tropis, gedung neon di Kota Malam, bintang & planet di Luar Angkasa) di belakang papan. Pion pemain berupa token karakter hewan (🦁🐼🐰🦖) di atas lingkaran berwarna, berpindah dengan animasi halus per kotak (bukan lompat kaku). Judul ditampilkan sebagai "papan nama kayu" ala petualangan.
 - **Mekanik modern (Power-Card)**: tiga kartu sederhana yang bisa didapat dari kotak khusus di papan.
   - 🛡️ **Perisai** — otomatis melindungi dari satu gigitan ular berikutnya.
   - 🎲 **Dadu Ganda** — aktifkan sebelum melempar untuk melempar dua dadu dan memakai angka tertinggi.
@@ -25,6 +25,7 @@ Yang sudah ada di project ini:
 - 3 tema visual yang bisa dipilih di layar setup (Hutan Tropis, Kota Malam, Luar Angkasa).
 - Kotak Misteri (efek acak: maju/mundur 5 langkah, dapat kartu, tukar posisi acak, atau tidak ada efek).
 - Combo/Streak: dadu kembar dua kali berturut-turut untuk pemain yang sama memberi giliran ekstra.
+- Token karakter hewan (Singa, Panda, Kelinci, Dino), papan nama kayu untuk judul, dan backdrop vektor bertema di belakang papan.
 
 ## Roadmap (Fase berikutnya)
 

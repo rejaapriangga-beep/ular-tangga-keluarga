@@ -34,11 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.game.GameEngine
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.game.PowerCardType
 import id.ulartangga.keluarga.ui.components.BoardView
 import id.ulartangga.keluarga.ui.components.DiceView
+import id.ulartangga.keluarga.ui.components.WoodenSign
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.launch
 
@@ -60,7 +62,6 @@ fun GameScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -133,7 +134,7 @@ private fun TopBar(onExit: () -> Unit, soundOn: Boolean, onToggleSound: () -> Un
         IconButton(onClick = onExit) {
             Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
         }
-        Text("Ular Tangga Keluarga", style = MaterialTheme.typography.titleMedium)
+        WoodenSign(text = "Ular Tangga Keluarga", style = MaterialTheme.typography.labelLarge)
         IconButton(onClick = onToggleSound) {
             Icon(
                 if (soundOn) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
@@ -166,8 +167,11 @@ private fun PlayersRow(players: List<Player>, currentPlayer: Player) {
                     modifier = Modifier
                         .size(28.dp)
                         .clip(CircleShape)
-                        .background(player.color)
-                )
+                        .background(player.color),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(player.avatar.emoji, fontSize = 16.sp)
+                }
                 Text(player.name, style = MaterialTheme.typography.labelSmall)
                 Text("#${player.position}", style = MaterialTheme.typography.labelSmall)
             }

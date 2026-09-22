@@ -10,6 +10,7 @@ class Player(
     val id: Int,
     val name: String,
     val color: Color,
+    val avatar: AnimalAvatar,
     val isBot: Boolean
 ) {
     var position by mutableStateOf(1)
