@@ -46,7 +46,7 @@ fun DiceView(
             .size(76.dp)
             .graphicsLayer { rotationZ = rotation }
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
+            .background(if (enabled) Color.White else Color(0xFFE0E0E0))
             .border(
                 width = 3.dp,
                 color = if (enabled) MaterialTheme.colorScheme.primary else Color(0xFFBDBDBD),
@@ -57,9 +57,10 @@ fun DiceView(
         Canvas(modifier = Modifier.matchParentSize()) {
             val pips = DICE_PIPS[value.coerceIn(1, 6)].orEmpty()
             val pipRadius = size.minDimension * 0.09f
+            val pipColor = if (enabled) Color(0xFF212121) else Color(0xFF9E9E9E)
             pips.forEach { (fx, fy) ->
                 drawCircle(
-                    color = Color(0xFF212121),
+                    color = pipColor,
                     radius = pipRadius,
                     center = Offset(size.width * fx, size.height * fy)
                 )

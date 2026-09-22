@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.game.BoardConfig
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.theme.BoardTheme
+import kotlin.math.atan2
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
@@ -86,28 +88,92 @@ private fun DrawScope.drawLadder(a: Offset, b: Offset, theme: BoardTheme, cellPx
     }
 }
 
-/** Ular proper: badan menyegmen mengecil ke ekor, kepala bulat dengan mata. */
+/** Ular proper: badan menyambung meruncing ke ekor (bukan rangkaian bulatan/cacing), kepala menghadap keluar dengan mata sipit dan lidah bercabang. */
 private fun DrawScope.drawSnake(a: Offset, b: Offset, theme: BoardTheme, cellPx: Float) {
     val control = Offset((a.x + b.x) / 2f + cellPx * 0.6f, (a.y + b.y) / 2f)
-    val segments = 28
+    val segments = 32
     val points = (0..segments).map { i -> quadraticPoint(a, control, b, i / segments.toFloat()) }
+    val darkScale = Color(
+        red = theme.snakeColor.red * 0.55f,
+        green = theme.snakeColor.green * 0.55f,
+        blue = theme.snakeColor.blue * 0.55f
+    )
 
-    for (i in points.indices) {
+    for (i in 0 until points.size - 1) {
         val t = i / (points.size - 1).toFloat()
-        val radius = cellPx * (0.15f - 0.09f * t)
-        drawCircle(color = theme.snakeColor, radius = radius.coerceAtLeast(cellPx * 0.025f), center = points[i])
+        val width = (cellPx * (0.30f - 0.20f * t)).coerceAtLeast(cellPx * 0.045f)
+        drawLine(
+            color = theme.snakeColor,
+            start = points[i],
+            end = points[i + 1],
+            strokeWidth = width,
+            cap = StrokeCap.Round
+        )
+    }
+
+    listOf(4, 10, 16, 22).forEach { i ->
+        if (i >= points.size - 1) return@forEach
+        val t = i / (points.size - 1).toFloat()
+        val width = (cellPx * (0.30f - 0.20f * t)).coerceAtLeast(cellPx * 0.045f)
+        val dir = Offset(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y)
+        val len = sqrt(dir.x * dir.x + dir.y * dir.y)
+        if (len < 0.001f) return@forEach
+        val perp = Offset(-dir.y / len, dir.x / len)
+        val half = width * 0.4f
+        drawLine(
+            color = darkScale,
+            start = Offset(points[i].x + perp.x * half, points[i].y + perp.y * half),
+            end = Offset(points[i].x - perp.x * half, points[i].y - perp.y * half),
+            strokeWidth = cellPx * 0.028f,
+            cap = StrokeCap.Round
+        )
     }
 
     val head = points.first()
-    drawCircle(color = theme.snakeColor, radius = cellPx * 0.19f, center = head)
-    val eyeOffset = cellPx * 0.07f
-    val eyeLift = cellPx * 0.03f
-    val leftEye = Offset(head.x - eyeOffset, head.y - eyeLift)
-    val rightEye = Offset(head.x + eyeOffset, head.y - eyeLift)
-    drawCircle(color = Color.White, radius = cellPx * 0.04f, center = leftEye)
-    drawCircle(color = Color.White, radius = cellPx * 0.04f, center = rightEye)
-    drawCircle(color = Color.Black, radius = cellPx * 0.018f, center = leftEye)
-    drawCircle(color = Color.Black, radius = cellPx * 0.018f, center = rightEye)
+    val neck = points[minOf(3, points.size - 1)]
+    val angleDeg = Math.toDegrees(atan2((head.y - neck.y).toDouble(), (head.x - neck.x).toDouble())).toFloat()
+
+    rotate(degrees = angleDeg, pivot = head) {
+        drawOval(
+            color = theme.snakeColor,
+            topLeft = Offset(head.x - cellPx * 0.08f, head.y - cellPx * 0.15f),
+            size = Size(cellPx * 0.36f, cellPx * 0.30f)
+        )
+
+        val eyeX = head.x + cellPx * 0.14f
+        listOf(head.y - cellPx * 0.09f, head.y + cellPx * 0.02f).forEach { eyeY ->
+            drawOval(
+                color = Color(0xFFFFD600),
+                topLeft = Offset(eyeX - cellPx * 0.045f, eyeY - cellPx * 0.045f),
+                size = Size(cellPx * 0.09f, cellPx * 0.09f)
+            )
+            drawLine(
+                color = Color.Black,
+                start = Offset(eyeX, eyeY - cellPx * 0.035f),
+                end = Offset(eyeX, eyeY + cellPx * 0.035f),
+                strokeWidth = cellPx * 0.018f,
+                cap = StrokeCap.Round
+            )
+        }
+
+        val tongueBase = Offset(head.x + cellPx * 0.2f, head.y - cellPx * 0.035f)
+        val tongueTip = Offset(head.x + cellPx * 0.32f, head.y - cellPx * 0.035f)
+        drawLine(Color(0xFFD32F2F), tongueBase, tongueTip, strokeWidth = cellPx * 0.018f, cap = StrokeCap.Round)
+        drawLine(
+            Color(0xFFD32F2F),
+            tongueTip,
+            Offset(tongueTip.x + cellPx * 0.05f, tongueTip.y - cellPx * 0.04f),
+            strokeWidth = cellPx * 0.014f,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            Color(0xFFD32F2F),
+            tongueTip,
+            Offset(tongueTip.x + cellPx * 0.05f, tongueTip.y + cellPx * 0.04f),
+            strokeWidth = cellPx * 0.014f,
+            cap = StrokeCap.Round
+        )
+    }
 }
 
 @Composable
@@ -128,7 +194,7 @@ fun BoardView(
 
     Box(
         modifier = modifier
-            .aspectRatio(1f)
+            .aspectRatio(1f, matchHeightConstraintsFirst = true)
             .onGloballyPositioned { coords -> boardPx = coords.size.width.toFloat() }
     ) {
         if (boardPx > 0f) {

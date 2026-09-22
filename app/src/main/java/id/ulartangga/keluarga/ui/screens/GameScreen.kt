@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +26,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -68,18 +71,37 @@ fun GameScreen(
         ) {
             TopBar(onExit = onExit, soundOn = soundOn, onToggleSound = onToggleSound)
             Spacer(Modifier.height(6.dp))
+            TurnIndicator(currentPlayer = engine.currentPlayer)
+            Spacer(Modifier.height(6.dp))
             PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
             Spacer(Modifier.height(6.dp))
-            BoardView(
-                players = engine.players,
-                theme = theme,
-                collapsedCells = engine.collapsedCells,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(10.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                BoardView(
+                    players = engine.players,
+                    theme = theme,
+                    collapsedCells = engine.collapsedCells
+                )
+            }
+            Spacer(Modifier.height(8.dp))
 
             engine.message?.let { msg ->
-                Text(msg, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        msg,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
+                }
                 Spacer(Modifier.height(6.dp))
             }
 
@@ -194,6 +216,35 @@ fun PlayersRow(players: List<Player>, currentPlayer: Player) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TurnIndicator(currentPlayer: Player, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(currentPlayer.color.copy(alpha = 0.9f))
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(currentPlayer.avatar.emoji, fontSize = 17.sp)
+        }
+        Spacer(Modifier.width(8.dp))
+        Text(
+            "Giliran ${currentPlayer.name}",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White
+        )
     }
 }
 
