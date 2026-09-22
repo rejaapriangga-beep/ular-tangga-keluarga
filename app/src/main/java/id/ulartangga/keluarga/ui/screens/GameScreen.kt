@@ -5,19 +5,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -52,7 +49,6 @@ import id.ulartangga.keluarga.game.PowerCardType
 import id.ulartangga.keluarga.ui.components.BoardView
 import id.ulartangga.keluarga.ui.components.DiceView
 import id.ulartangga.keluarga.ui.components.MiniGameDialog
-import id.ulartangga.keluarga.ui.components.WoodenSign
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -71,76 +67,25 @@ fun GameScreen(
         engine.botTakeTurnIfNeeded()
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 6.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TopBar(onExit = onExit, soundOn = soundOn, onToggleSound = onToggleSound)
-            Spacer(Modifier.height(6.dp))
-            PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
-            Spacer(Modifier.height(6.dp))
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                BoardView(
-                    players = engine.players,
-                    theme = theme,
-                    collapsedCells = engine.collapsedCells
-                )
-            }
-            Spacer(Modifier.height(8.dp))
+    val current = engine.currentPlayer
+    val canAct = !engine.isBusy && engine.winner == null && !engine.coopComplete &&
+        !current.isBot && !current.finished
 
-            engine.message?.let { msg ->
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        msg,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
-            }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        BoardView(
+            players = engine.players,
+            theme = theme,
+            collapsedCells = engine.collapsedCells
+        )
 
-            val current = engine.currentPlayer
-            val canAct = !engine.isBusy && engine.winner == null && !engine.coopComplete &&
-                !current.isBot && !current.finished
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-            ) {
-                CardTray(
-                    player = current,
-                    enabled = canAct,
-                    onUseDoubleDice = { engine.activateDoubleDice() },
-                    onUseSwap = { engine.beginSwap() },
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-                DiceView(
-                    value = engine.diceValue,
-                    isRolling = engine.isBusy,
-                    enabled = canAct,
-                    onRoll = { scope.launch { engine.rollDice() } },
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-
-            if (engine.doubleDiceActive) {
-                Spacer(Modifier.height(4.dp))
-                Text("Dadu Ganda aktif!", color = MaterialTheme.colorScheme.tertiary)
-            }
+        FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
+        }
+        FloatingIconButton(onClick = onToggleSound, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+            Icon(
+                if (soundOn) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
+                contentDescription = "Suara"
+            )
         }
 
         TurnPopup(
@@ -148,8 +93,51 @@ fun GameScreen(
             currentPlayer = engine.currentPlayer,
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = 64.dp)
+                .padding(top = 56.dp)
         )
+
+        engine.message?.let { msg ->
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 112.dp, start = 16.dp, end = 16.dp)
+            ) {
+                Text(
+                    msg,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+            }
+        }
+
+        DiceView(
+            value = engine.diceValue,
+            isRolling = engine.isBusy,
+            enabled = canAct,
+            onRoll = { scope.launch { engine.rollDice() } },
+            modifier = Modifier.align(Alignment.Center)
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (engine.doubleDiceActive) {
+                Text("Dadu Ganda aktif!", color = MaterialTheme.colorScheme.tertiary)
+                Spacer(Modifier.height(4.dp))
+            }
+            CardTray(
+                player = current,
+                enabled = canAct,
+                onUseDoubleDice = { engine.activateDoubleDice() },
+                onUseSwap = { engine.beginSwap() }
+            )
+        }
 
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
@@ -176,66 +164,16 @@ fun GameScreen(
     }
 }
 
+/** Tombol ikon melayang di atas papan, dengan latar putih transparan agar tetap terlihat di papan yang ramai warna. */
 @Composable
-private fun TopBar(onExit: () -> Unit, soundOn: Boolean, onToggleSound: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+fun FloatingIconButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .size(40.dp)
+            .background(Color.White.copy(alpha = 0.75f), CircleShape)
     ) {
-        IconButton(onClick = onExit) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
-        }
-        WoodenSign(text = "Ular Tangga Keluarga", style = MaterialTheme.typography.labelLarge)
-        IconButton(onClick = onToggleSound) {
-            Icon(
-                if (soundOn) Icons.Filled.VolumeUp else Icons.Filled.VolumeOff,
-                contentDescription = "Suara"
-            )
-        }
-    }
-}
-
-@Composable
-fun PlayersRow(players: List<Player>, currentPlayer: Player) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        players.forEach { player ->
-            val isTurn = player === currentPlayer
-            Column(
-                modifier = Modifier
-                    .background(
-                        if (isTurn) player.color.copy(alpha = 0.25f) else Color.Transparent,
-                        RoundedCornerShape(12.dp)
-                    )
-                    .padding(6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(player.color),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        player.avatar.initial.toString(),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-                Text(player.name, style = MaterialTheme.typography.labelSmall)
-                Text(
-                    if (player.finished) "🏁 Selesai" else "#${player.position}",
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-        }
+        content()
     }
 }
 
