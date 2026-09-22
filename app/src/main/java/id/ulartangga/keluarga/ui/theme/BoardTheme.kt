@@ -17,7 +17,8 @@ enum class BoardTheme(
     val ladderRungColor: Color,
     val snakeColor: Color,
     val cardCellColor: Color,
-    val mysteryCellColor: Color
+    val mysteryCellColor: Color,
+    val miniGameCellColor: Color
 ) {
     FOREST(
         label = "Hutan Tropis",
@@ -34,7 +35,8 @@ enum class BoardTheme(
         ladderRungColor = Color(0xFFFFE082),
         snakeColor = Color(0xFFD32F2F),
         cardCellColor = Color(0xFF7B1FA2),
-        mysteryCellColor = Color(0xFF6D4C41)
+        mysteryCellColor = Color(0xFF6D4C41),
+        miniGameCellColor = Color(0xFFF57C00)
     ),
     NEON_CITY(
         label = "Kota Malam",
@@ -51,7 +53,8 @@ enum class BoardTheme(
         ladderRungColor = Color(0xFF80F5FF),
         snakeColor = Color(0xFFFF2E92),
         cardCellColor = Color(0xFFFFEA00),
-        mysteryCellColor = Color(0xFF7C4DFF)
+        mysteryCellColor = Color(0xFF7C4DFF),
+        miniGameCellColor = Color(0xFF00FF9C)
     ),
     SPACE(
         label = "Luar Angkasa",
@@ -68,6 +71,7 @@ enum class BoardTheme(
         ladderRungColor = Color(0xFFB2EBF2),
         snakeColor = Color(0xFFFF7043),
         cardCellColor = Color(0xFFFFD54F),
-        mysteryCellColor = Color(0xFFAB47BC)
+        mysteryCellColor = Color(0xFFAB47BC),
+        miniGameCellColor = Color(0xFF4FC3F7)
     )
 }

@@ -40,6 +40,7 @@ import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.game.PowerCardType
 import id.ulartangga.keluarga.ui.components.BoardView
 import id.ulartangga.keluarga.ui.components.DiceView
+import id.ulartangga.keluarga.ui.components.MiniGameDialog
 import id.ulartangga.keluarga.ui.components.WoodenSign
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.launch
@@ -115,6 +116,13 @@ fun GameScreen(
                 players = engine.players.filter { it !== engine.currentPlayer },
                 onSelect = { engine.selectSwapTarget(it) },
                 onDismiss = { engine.cancelSwap() }
+            )
+        }
+
+        engine.miniGameRequest?.let { request ->
+            MiniGameDialog(
+                playerName = request.player.name,
+                onResult = { success -> engine.resolveMiniGame(success) }
             )
         }
 

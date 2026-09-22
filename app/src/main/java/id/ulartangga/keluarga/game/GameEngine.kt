@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import id.ulartangga.keluarga.sound.SoundEvent
 import kotlin.random.Random
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 
 class GameEngine(
@@ -27,8 +28,14 @@ class GameEngine(
         private set
     var awaitingSwapTarget by mutableStateOf(false)
         private set
+    var miniGameRequest by mutableStateOf<MiniGameRequest?>(null)
+        private set
 
     val currentPlayer: Player get() = players[currentPlayerIndex]
+
+    fun resolveMiniGame(success: Boolean) {
+        miniGameRequest?.deferred?.complete(success)
+    }
 
     fun activateDoubleDice() {
         if (!isBusy && winner == null && currentPlayer.cards.remove(PowerCardType.DOUBLE_DICE)) {
@@ -118,7 +125,38 @@ class GameEngine(
             return
         }
 
-        if (!mysteryMoved) {
+        var miniGameMoved = false
+        if (target in BoardConfig.miniGameCells) {
+            val success = if (player.isBot) {
+                Random.nextInt(100) < 55
+            } else {
+                val deferred = CompletableDeferred<Boolean>()
+                miniGameRequest = MiniGameRequest(player, deferred)
+                val result = deferred.await()
+                miniGameRequest = null
+                result
+            }
+            if (success) {
+                val newPos = (player.position + 4).coerceAtMost(100)
+                player.position = newPos
+                player.animatedCell = newPos
+                message = "${player.name} berhasil tantangan Tap Cepat! Maju 4 langkah!"
+                onSound(SoundEvent.LADDER)
+                miniGameMoved = true
+            } else {
+                message = "${player.name} belum berhasil tantangan Tap Cepat, coba lagi lain kali!"
+            }
+            delay(400)
+        }
+
+        if (player.position == 100) {
+            onSound(SoundEvent.WIN)
+            winner = player
+            isBusy = false
+            return
+        }
+
+        if (!mysteryMoved && !miniGameMoved) {
             BoardConfig.ladders[target]?.let { end ->
                 delay(200)
                 player.animatedCell = end

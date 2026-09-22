@@ -28,12 +28,12 @@ Yang sudah ada di project ini:
 - Token karakter hewan (Singa, Panda, Kelinci, Dino), papan nama kayu untuk judul, dan backdrop vektor bertema di belakang papan.
 - Personalisasi pemain: nama & avatar bisa diedit per pemain di layar setup.
 - Mode "Pemain Muda": pemain yang ditandai mulai dengan kartu Perisai gratis dan Kotak Misteri tidak akan memberi efek mundur — bikin permainan lintas usia lebih seimbang.
+- Ritual harian: streak hari main berturut-turut (disimpan di perangkat via `SharedPreferences`), memberi kartu power-card gratis tiap kali app dibuka di hari baru.
+- Mini-game "Tap Cepat" (⚡ kotak spesial): tantangan reflex 3 detik, berhasil = maju 4 langkah, gagal = tidak ada efek buruk.
 
 ## Roadmap (Fase berikutnya)
 
-- Mini-game singkat saat mendarat di kotak spesial.
 - Mode Co-op dan Battle Royale Mini.
-- Ritual harian (streak/reward harian).
 - Replay/highlight akhir permainan yang bisa dibagikan.
 - Multiplayer online.
 
