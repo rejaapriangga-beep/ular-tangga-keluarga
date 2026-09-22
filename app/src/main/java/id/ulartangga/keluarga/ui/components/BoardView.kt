@@ -320,12 +320,12 @@ fun BoardView(
                     animationSpec = tween(220),
                     label = "piece-${player.id}"
                 )
-                val pieceSizeDp = with(density) { (cellPx * 0.46f).toDp() }
+                val pieceSizeDp = with(density) { (cellPx * 0.58f).toDp() }
                 Column(
                     modifier = Modifier.offset {
                         IntOffset(
-                            (animated.x - cellPx * 0.23f).roundToInt(),
-                            (animated.y - cellPx * 0.23f).roundToInt()
+                            (animated.x - cellPx * 0.29f).roundToInt(),
+                            (animated.y - cellPx * 0.29f).roundToInt()
                         )
                     },
                     horizontalAlignment = Alignment.CenterHorizontally

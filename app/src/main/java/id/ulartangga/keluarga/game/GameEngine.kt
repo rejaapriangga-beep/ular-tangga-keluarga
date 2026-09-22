@@ -52,6 +52,9 @@ class GameEngine(
 
     companion object {
         private const val MAX_LOG_ENTRIES = 60
+        private const val DICE_SHAKE_TICKS = 5
+        private const val DICE_SHAKE_INTERVAL_MS = 100L
+        private const val MOVE_STEP_DELAY_MS = 260L
     }
 
     fun resolveMiniGame(success: Boolean) {
@@ -103,8 +106,11 @@ class GameEngine(
         val finalRoll = if (roll2 != null) maxOf(roll1, roll2) else roll1
         doubleDiceActive = false
         diceValue = finalRoll
-        onSound(SoundEvent.TICK)
-        delay(500)
+        // Kocokan dadu: beberapa tick cepat berturut-turut selama animasi putar, bukan satu bunyi tunggal.
+        repeat(DICE_SHAKE_TICKS) {
+            onSound(SoundEvent.TICK)
+            delay(DICE_SHAKE_INTERVAL_MS)
+        }
 
         val isCombo = player.lastRoll != 0 && player.lastRoll == finalRoll
         player.lastRoll = finalRoll
@@ -115,12 +121,14 @@ class GameEngine(
         if (mode == GameMode.BATTLE_ROYALE && target in collapsedCells) {
             for (cell in (start + 1)..target) {
                 player.animatedCell = cell
-                delay(120)
+                onSound(SoundEvent.STEP)
+                delay(MOVE_STEP_DELAY_MS)
             }
             delay(150)
             for (cell in target downTo start) {
                 player.animatedCell = cell
-                delay(90)
+                onSound(SoundEvent.STEP)
+                delay(MOVE_STEP_DELAY_MS)
             }
             message = "💥 Kotak $target runtuh! ${player.name} terpental kembali ke $start."
             onSound(SoundEvent.SNAKE)
@@ -130,9 +138,12 @@ class GameEngine(
 
         for (cell in (start + 1)..target) {
             player.animatedCell = cell
-            delay(180)
+            onSound(SoundEvent.STEP)
+            delay(MOVE_STEP_DELAY_MS)
         }
         player.position = target
+        message = "${player.name} melempar dadu ($finalRoll): $start → $target"
+        delay(250)
 
         if (finishTurnIfWon(player)) return
 

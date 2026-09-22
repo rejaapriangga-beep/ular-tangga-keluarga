@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -370,6 +372,9 @@ fun TurnPopup(turnKey: Any?, currentPlayer: Player, modifier: Modifier = Modifie
     }
 }
 
+/** FlowRow (bukan Row) supaya kartu tetap tersusun horizontal berjajar dan membungkus ke baris baru
+ *  jika tidak cukup lebar, bukan meluber tak menentu di kolom tengah panel yang sempit. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CardTray(
     player: Player,
@@ -378,7 +383,11 @@ fun CardTray(
     onUseSwap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
         player.cards.forEach { card ->
             AssistChip(
                 onClick = {
