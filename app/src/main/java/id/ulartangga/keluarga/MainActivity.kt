@@ -17,17 +17,14 @@ import id.ulartangga.keluarga.game.GameEngine
 import id.ulartangga.keluarga.sound.SoundManager
 import id.ulartangga.keluarga.ui.screens.GameScreen
 import id.ulartangga.keluarga.ui.screens.SetupScreen
+import id.ulartangga.keluarga.ui.theme.BoardTheme
 import id.ulartangga.keluarga.ui.theme.UlarTanggaTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            UlarTanggaTheme {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    UlarTanggaApp()
-                }
-            }
+            UlarTanggaApp()
         }
     }
 }
@@ -36,25 +33,35 @@ class MainActivity : ComponentActivity() {
 fun UlarTanggaApp() {
     var engine by remember { mutableStateOf<GameEngine?>(null) }
     var soundOn by remember { mutableStateOf(true) }
+    var boardTheme by remember { mutableStateOf(BoardTheme.FOREST) }
     val soundManager = remember { SoundManager() }
 
     DisposableEffect(Unit) {
         onDispose { soundManager.release() }
     }
 
-    val current = engine
-    if (current == null) {
-        SetupScreen(onStart = { players ->
-            engine = GameEngine(players) { event ->
-                if (soundOn) soundManager.play(event)
+    UlarTanggaTheme(boardTheme = boardTheme) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            val current = engine
+            if (current == null) {
+                SetupScreen(
+                    selectedTheme = boardTheme,
+                    onThemeChange = { boardTheme = it },
+                    onStart = { players ->
+                        engine = GameEngine(players) { event ->
+                            if (soundOn) soundManager.play(event)
+                        }
+                    }
+                )
+            } else {
+                GameScreen(
+                    engine = current,
+                    theme = boardTheme,
+                    soundOn = soundOn,
+                    onToggleSound = { soundOn = !soundOn },
+                    onExit = { engine = null }
+                )
             }
-        })
-    } else {
-        GameScreen(
-            engine = current,
-            soundOn = soundOn,
-            onToggleSound = { soundOn = !soundOn },
-            onExit = { engine = null }
-        )
+        }
     }
 }

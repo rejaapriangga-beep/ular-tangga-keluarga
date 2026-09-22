@@ -30,13 +30,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import id.ulartangga.keluarga.game.BoardConfig
 import id.ulartangga.keluarga.game.Player
-import id.ulartangga.keluarga.ui.theme.BoardBorder
-import id.ulartangga.keluarga.ui.theme.BoardDark
-import id.ulartangga.keluarga.ui.theme.BoardLight
-import id.ulartangga.keluarga.ui.theme.CardCellColor
-import id.ulartangga.keluarga.ui.theme.LadderColor
-import id.ulartangga.keluarga.ui.theme.LadderRungColor
-import id.ulartangga.keluarga.ui.theme.SnakeColor
+import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlin.math.roundToInt
 
 private data class CellGeometry(val row: Int, val col: Int, val center: Offset)
@@ -54,9 +48,15 @@ private fun cellGeometry(cell: Int, cellPx: Float): CellGeometry {
 private fun cellCenter(cell: Int, cellPx: Float) = cellGeometry(cell, cellPx).center
 
 @Composable
-fun BoardView(players: List<Player>, modifier: Modifier = Modifier) {
+fun BoardView(players: List<Player>, theme: BoardTheme, modifier: Modifier = Modifier) {
     var boardPx by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
+    val textColor = android.graphics.Color.argb(
+        140,
+        (theme.onBackground.red * 255).toInt(),
+        (theme.onBackground.green * 255).toInt(),
+        (theme.onBackground.blue * 255).toInt()
+    )
 
     Box(
         modifier = modifier
@@ -72,31 +72,31 @@ fun BoardView(players: List<Player>, modifier: Modifier = Modifier) {
                     val topLeft = Offset(geo.center.x - cellPx / 2f, geo.center.y - cellPx / 2f)
                     val isEven = (geo.row + geo.col) % 2 == 0
                     drawRect(
-                        color = if (isEven) BoardLight else BoardDark,
+                        color = if (isEven) theme.boardLight else theme.boardDark,
                         topLeft = topLeft,
                         size = Size(cellPx, cellPx)
                     )
                     if (cell in BoardConfig.cardCells) {
-                        drawCircle(color = CardCellColor, radius = cellPx * 0.12f, center = geo.center)
+                        drawCircle(color = theme.cardCellColor, radius = cellPx * 0.12f, center = geo.center)
                     }
                     drawContext.canvas.nativeCanvas.drawText(
                         cell.toString(),
                         topLeft.x + cellPx * 0.08f,
                         topLeft.y + cellPx * 0.22f,
                         android.graphics.Paint().apply {
-                            color = android.graphics.Color.argb(140, 40, 30, 20)
+                            color = textColor
                             textSize = cellPx * 0.16f
                         }
                     )
                 }
 
-                drawRect(color = BoardBorder, size = size, style = Stroke(width = 3f))
+                drawRect(color = theme.boardBorder, size = size, style = Stroke(width = 3f))
 
                 BoardConfig.ladders.forEach { (start, end) ->
                     val a = cellCenter(start, cellPx)
                     val b = cellCenter(end, cellPx)
-                    drawLine(LadderColor, a, b, strokeWidth = cellPx * 0.14f, cap = StrokeCap.Round)
-                    drawLine(LadderRungColor, a, b, strokeWidth = cellPx * 0.05f, cap = StrokeCap.Round)
+                    drawLine(theme.ladderColor, a, b, strokeWidth = cellPx * 0.14f, cap = StrokeCap.Round)
+                    drawLine(theme.ladderRungColor, a, b, strokeWidth = cellPx * 0.05f, cap = StrokeCap.Round)
                 }
 
                 BoardConfig.snakes.forEach { (start, end) ->
@@ -107,8 +107,8 @@ fun BoardView(players: List<Player>, modifier: Modifier = Modifier) {
                         moveTo(a.x, a.y)
                         quadraticBezierTo(mid.x, mid.y, b.x, b.y)
                     }
-                    drawPath(path, color = SnakeColor, style = Stroke(width = cellPx * 0.12f, cap = StrokeCap.Round))
-                    drawCircle(color = SnakeColor, radius = cellPx * 0.1f, center = a)
+                    drawPath(path, color = theme.snakeColor, style = Stroke(width = cellPx * 0.12f, cap = StrokeCap.Round))
+                    drawCircle(color = theme.snakeColor, radius = cellPx * 0.1f, center = a)
                 }
             }
 

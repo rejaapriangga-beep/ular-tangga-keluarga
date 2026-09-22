@@ -39,11 +39,13 @@ import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.game.PowerCardType
 import id.ulartangga.keluarga.ui.components.BoardView
 import id.ulartangga.keluarga.ui.components.DiceView
+import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.launch
 
 @Composable
 fun GameScreen(
     engine: GameEngine,
+    theme: BoardTheme,
     soundOn: Boolean,
     onToggleSound: () -> Unit,
     onExit: () -> Unit
@@ -68,6 +70,7 @@ fun GameScreen(
             Spacer(Modifier.height(8.dp))
             BoardView(
                 players = engine.players,
+                theme = theme,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp)

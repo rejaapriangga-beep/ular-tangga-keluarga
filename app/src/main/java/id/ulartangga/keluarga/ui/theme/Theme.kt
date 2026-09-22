@@ -1,43 +1,27 @@
 package id.ulartangga.keluarga.ui.theme
 
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-
-private val LightColors = lightColorScheme(
-    primary = ForestPrimary,
-    secondary = ForestSecondary,
-    tertiary = ForestTertiary,
-    background = ForestBackgroundLight
-)
-
-private val DarkColors = darkColorScheme(
-    primary = ForestPrimary,
-    secondary = ForestSecondary,
-    tertiary = ForestTertiary,
-    background = ForestBackgroundDark
-)
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun UlarTanggaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    boardTheme: BoardTheme,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColors
-        else -> LightColors
-    }
+    val colorScheme = lightColorScheme(
+        primary = boardTheme.primary,
+        onPrimary = Color.White,
+        secondary = boardTheme.secondary,
+        tertiary = boardTheme.tertiary,
+        background = boardTheme.backgroundLight,
+        onBackground = boardTheme.onBackground,
+        surface = boardTheme.backgroundLight,
+        onSurface = boardTheme.onBackground,
+        surfaceVariant = boardTheme.boardDark,
+        onSurfaceVariant = boardTheme.onBackground
+    )
 
     MaterialTheme(
         colorScheme = colorScheme,
