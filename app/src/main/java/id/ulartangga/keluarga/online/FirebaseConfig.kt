@@ -10,10 +10,10 @@ package id.ulartangga.keluarga.online
  * (isConfigured = false) tapi sisa aplikasi tetap berjalan normal.
  */
 object FirebaseConfig {
-    const val API_KEY = ""
-    const val APPLICATION_ID = ""
-    const val PROJECT_ID = ""
-    const val DATABASE_URL = ""
+    const val API_KEY = "AIzaSyAeVUSdDFTBz8eYa2x5rPRCLj7R5EAMrnU"
+    const val APPLICATION_ID = "1:327980925893:web:26382980ef13de4f2e81ac"
+    const val PROJECT_ID = "ular-tangga-keluarga"
+    const val DATABASE_URL = "https://ular-tangga-keluarga-default-rtdb.asia-southeast1.firebasedatabase.app"
 
     val isConfigured: Boolean
         get() = API_KEY.isNotBlank() && APPLICATION_ID.isNotBlank() &&
