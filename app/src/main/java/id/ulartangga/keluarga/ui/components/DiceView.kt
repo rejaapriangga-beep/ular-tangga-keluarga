@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 private val DICE_PIPS: Map<Int, List<Pair<Float, Float>>> = mapOf(
@@ -34,7 +35,8 @@ fun DiceView(
     isRolling: Boolean,
     enabled: Boolean,
     onRoll: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sizeDp: Dp = 76.dp
 ) {
     val rotation by animateFloatAsState(
         targetValue = if (isRolling) 360f else 0f,
@@ -43,7 +45,7 @@ fun DiceView(
     )
     Box(
         modifier = modifier
-            .size(76.dp)
+            .size(sizeDp)
             .graphicsLayer { rotationZ = rotation }
             .clip(RoundedCornerShape(16.dp))
             .background(if (enabled) Color.White else Color(0xFFE0E0E0))

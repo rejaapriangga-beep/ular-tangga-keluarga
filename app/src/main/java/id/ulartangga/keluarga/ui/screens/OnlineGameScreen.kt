@@ -60,7 +60,32 @@ fun OnlineHostGameScreen(
                 log = engine.log,
                 players = engine.players,
                 currentPlayer = engine.currentPlayer
-            )
+            ) {
+                if (!myTurn && engine.winner == null) {
+                    Text(
+                        "Menunggu ${current.name}...",
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
+                if (myTurn) {
+                    CardTray(
+                        player = current,
+                        enabled = !engine.isBusy,
+                        onUseDoubleDice = { engine.activateDoubleDice() },
+                        onUseSwap = { engine.beginSwap() }
+                    )
+                    Spacer(Modifier.height(6.dp))
+                }
+                DiceView(
+                    value = engine.diceValue,
+                    isRolling = engine.isBusy,
+                    enabled = myTurn && !engine.isBusy,
+                    onRoll = { controller.rollAsHost() },
+                    sizeDp = 56.dp
+                )
+            }
         }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
@@ -89,34 +114,6 @@ fun OnlineHostGameScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                )
-            }
-        }
-
-        DiceView(
-            value = engine.diceValue,
-            isRolling = engine.isBusy,
-            enabled = myTurn && !engine.isBusy,
-            onRoll = { controller.rollAsHost() },
-            modifier = Modifier.align(Alignment.Center)
-        )
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = BOTTOM_PANEL_HEIGHT + 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (!myTurn && engine.winner == null) {
-                Text("Menunggu ${current.name} melempar dadu...", style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(6.dp))
-            }
-            if (myTurn) {
-                CardTray(
-                    player = current,
-                    enabled = !engine.isBusy,
-                    onUseDoubleDice = { engine.activateDoubleDice() },
-                    onUseSwap = { engine.beginSwap() }
                 )
             }
         }
@@ -177,7 +174,23 @@ fun OnlineGuestGameScreen(
                     log = guestLog,
                     players = controller.players,
                     currentPlayer = current
-                )
+                ) {
+                    if (!controller.isMyTurn && controller.winnerDeviceId == null) {
+                        Text(
+                            "Menunggu ${current.name}...",
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                        Spacer(Modifier.height(4.dp))
+                    }
+                    DiceView(
+                        value = controller.diceValue,
+                        isRolling = controller.isBusy,
+                        enabled = controller.isMyTurn,
+                        onRoll = { controller.requestRoll() },
+                        sizeDp = 56.dp
+                    )
+                }
             }
         }
 
@@ -211,24 +224,6 @@ fun OnlineGuestGameScreen(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 )
             }
-        }
-
-        DiceView(
-            value = controller.diceValue,
-            isRolling = controller.isBusy,
-            enabled = controller.isMyTurn,
-            onRoll = { controller.requestRoll() },
-            modifier = Modifier.align(Alignment.Center)
-        )
-
-        if (!controller.isMyTurn && controller.winnerDeviceId == null) {
-            Text(
-                "Menunggu ${current?.name ?: "pemain lain"} melempar dadu...",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = BOTTOM_PANEL_HEIGHT + 8.dp)
-            )
         }
 
         controller.winnerDeviceId?.let { winnerId ->

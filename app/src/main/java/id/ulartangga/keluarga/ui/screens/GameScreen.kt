@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -56,7 +58,7 @@ import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-val BOTTOM_PANEL_HEIGHT = 150.dp
+val BOTTOM_PANEL_HEIGHT = 176.dp
 
 @Composable
 fun GameScreen(
@@ -93,7 +95,26 @@ fun GameScreen(
                 log = engine.log,
                 players = engine.players,
                 currentPlayer = engine.currentPlayer
-            )
+            ) {
+                if (engine.doubleDiceActive) {
+                    Text("Dadu Ganda aktif!", color = MaterialTheme.colorScheme.tertiary, style = MaterialTheme.typography.labelSmall)
+                    Spacer(Modifier.height(4.dp))
+                }
+                CardTray(
+                    player = current,
+                    enabled = canAct,
+                    onUseDoubleDice = { engine.activateDoubleDice() },
+                    onUseSwap = { engine.beginSwap() }
+                )
+                Spacer(Modifier.height(6.dp))
+                DiceView(
+                    value = engine.diceValue,
+                    isRolling = engine.isBusy,
+                    enabled = canAct,
+                    onRoll = { scope.launch { engine.rollDice() } },
+                    sizeDp = 56.dp
+                )
+            }
         }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
@@ -131,32 +152,6 @@ fun GameScreen(
             }
         }
 
-        DiceView(
-            value = engine.diceValue,
-            isRolling = engine.isBusy,
-            enabled = canAct,
-            onRoll = { scope.launch { engine.rollDice() } },
-            modifier = Modifier.align(Alignment.Center)
-        )
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = BOTTOM_PANEL_HEIGHT + 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (engine.doubleDiceActive) {
-                Text("Dadu Ganda aktif!", color = MaterialTheme.colorScheme.tertiary)
-                Spacer(Modifier.height(4.dp))
-            }
-            CardTray(
-                player = current,
-                enabled = canAct,
-                onUseDoubleDice = { engine.activateDoubleDice() },
-                onUseSwap = { engine.beginSwap() }
-            )
-        }
-
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
                 players = engine.players.filter { it !== engine.currentPlayer },
@@ -182,17 +177,29 @@ fun GameScreen(
     }
 }
 
-/** Panel bawah 2 kolom: log langkah (kiri) dan daftar karakter pemain (kanan), masing-masing 50% lebar. */
+/** Panel bawah 3 kolom (masing-masing ~sepertiga lebar): log langkah (kiri), dadu & kartu power-up (tengah), daftar pemain (kanan). */
 @Composable
-fun BottomInfoPanel(log: List<String>, players: List<Player>, currentPlayer: Player, modifier: Modifier = Modifier) {
+fun BottomInfoPanel(
+    log: List<String>,
+    players: List<Player>,
+    currentPlayer: Player,
+    modifier: Modifier = Modifier,
+    diceColumn: @Composable ColumnScope.() -> Unit
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(BOTTOM_PANEL_HEIGHT)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 6.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        MoveLogPanel(log = log, modifier = Modifier.weight(1f).fillMaxSize())
+        MoveLogPanel(log = log, players = players, modifier = Modifier.weight(1f).fillMaxSize())
+        Column(
+            modifier = Modifier.weight(1f).fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            content = diceColumn
+        )
         PlayerStatusList(
             players = players,
             currentPlayer = currentPlayer,
@@ -201,8 +208,9 @@ fun BottomInfoPanel(log: List<String>, players: List<Player>, currentPlayer: Pla
     }
 }
 
+/** Log langkah semua pemain; setiap baris diwarnai sesuai warna pemain yang disebut di teksnya, dengan jarak ekstra saat pemain berganti. */
 @Composable
-fun MoveLogPanel(log: List<String>, modifier: Modifier = Modifier) {
+fun MoveLogPanel(log: List<String>, players: List<Player>, modifier: Modifier = Modifier) {
     Surface(
         color = Color.White.copy(alpha = 0.6f),
         shape = RoundedCornerShape(10.dp),
@@ -213,12 +221,27 @@ fun MoveLogPanel(log: List<String>, modifier: Modifier = Modifier) {
                 Text("Belum ada langkah", style = MaterialTheme.typography.labelSmall)
             }
         } else {
+            val reversedLog = log.asReversed()
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(6.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                items(log.asReversed()) { entry ->
-                    Text(entry, style = MaterialTheme.typography.labelSmall, maxLines = 2)
+                itemsIndexed(reversedLog) { index, entry ->
+                    val player = players.firstOrNull { entry.startsWith(it.name) }
+                    val previousPlayer = if (index > 0) {
+                        players.firstOrNull { reversedLog[index - 1].startsWith(it.name) }
+                    } else {
+                        null
+                    }
+                    if (index > 0 && previousPlayer !== player) {
+                        Spacer(Modifier.height(6.dp))
+                    }
+                    Text(
+                        entry,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = player?.color ?: MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2
+                    )
                 }
             }
         }
