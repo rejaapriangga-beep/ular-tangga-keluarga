@@ -2,6 +2,7 @@ package id.ulartangga.keluarga.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,11 +75,15 @@ fun GameScreen(
             Spacer(Modifier.height(6.dp))
             PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
             Spacer(Modifier.height(6.dp))
+            val boardScrollState = rememberScrollState()
+            LaunchedEffect(boardScrollState.maxValue) {
+                if (boardScrollState.maxValue > 0) boardScrollState.scrollTo(boardScrollState.maxValue)
+            }
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .verticalScroll(boardScrollState)
             ) {
                 BoardView(
                     players = engine.players,

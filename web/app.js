@@ -23,11 +23,11 @@ const COLUMNS = 7;
 const ROWS = 14;
 const TOTAL_CELLS = COLUMNS * ROWS;
 
-const LADDERS = { 3: 24, 9: 28, 13: 32, 19: 38, 23: 44, 30: 49, 34: 53, 41: 60, 52: 71, 67: 86, 76: 95 };
-const SNAKES = { 17: 5, 26: 10, 37: 18, 43: 22, 54: 33, 61: 40, 70: 48, 79: 57, 88: 65, 96: 75 };
-const CARD_CELLS = new Set([4, 11, 20, 29, 46, 58, 66, 77, 90]);
-const MYSTERY_CELLS = new Set([6, 14, 21, 31, 47, 59, 68, 80, 91]);
-const MINIGAME_CELLS = new Set([8, 16, 25, 36, 50, 64, 74, 84]);
+const LADDERS = { 4: 18, 10: 31, 17: 30, 26: 47, 40: 54, 50: 64, 59: 73, 72: 91 };
+const SNAKES = { 15: 2, 29: 9, 39: 20, 53: 35, 63: 44, 77: 57, 87: 68, 95: 82 };
+const CARD_CELLS = new Set([6, 13, 23, 34, 43, 52, 61, 70, 80]);
+const MYSTERY_CELLS = new Set([8, 22, 33, 42, 51, 62, 71, 84, 93]);
+const MINIGAME_CELLS = new Set([7, 19, 28, 37, 46, 56, 66, 79]);
 
 function getDeviceId() {
   let id = localStorage.getItem("deviceId");

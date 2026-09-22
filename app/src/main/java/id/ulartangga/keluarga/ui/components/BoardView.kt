@@ -198,7 +198,7 @@ fun BoardView(
         modifier = modifier
             .aspectRatio(
                 BoardConfig.COLUMNS.toFloat() / BoardConfig.ROWS.toFloat(),
-                matchHeightConstraintsFirst = true
+                matchHeightConstraintsFirst = false
             )
             .onGloballyPositioned { coords -> boardPx = coords.size.width.toFloat() }
     ) {

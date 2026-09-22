@@ -6,18 +6,18 @@ object BoardConfig {
     const val TOTAL_CELLS = COLUMNS * ROWS
 
     val ladders: Map<Int, Int> = mapOf(
-        3 to 24, 9 to 28, 13 to 32, 19 to 38, 23 to 44,
-        30 to 49, 34 to 53, 41 to 60, 52 to 71, 67 to 86, 76 to 95
+        4 to 18, 10 to 31, 17 to 30, 26 to 47,
+        40 to 54, 50 to 64, 59 to 73, 72 to 91
     )
 
     val snakes: Map<Int, Int> = mapOf(
-        17 to 5, 26 to 10, 37 to 18, 43 to 22, 54 to 33,
-        61 to 40, 70 to 48, 79 to 57, 88 to 65, 96 to 75
+        15 to 2, 29 to 9, 39 to 20, 53 to 35,
+        63 to 44, 77 to 57, 87 to 68, 95 to 82
     )
 
-    val cardCells: Set<Int> = setOf(4, 11, 20, 29, 46, 58, 66, 77, 90)
+    val cardCells: Set<Int> = setOf(6, 13, 23, 34, 43, 52, 61, 70, 80)
 
-    val mysteryCells: Set<Int> = setOf(6, 14, 21, 31, 47, 59, 68, 80, 91)
+    val mysteryCells: Set<Int> = setOf(8, 22, 33, 42, 51, 62, 71, 84, 93)
 
-    val miniGameCells: Set<Int> = setOf(8, 16, 25, 36, 50, 64, 74, 84)
+    val miniGameCells: Set<Int> = setOf(7, 19, 28, 37, 46, 56, 66, 79)
 }
