@@ -28,17 +28,31 @@ class GameEngine(
         private set
     var doubleDiceActive by mutableStateOf(false)
         private set
-    var message by mutableStateOf<String?>(null)
-        private set
+    private var _message by mutableStateOf<String?>(null)
+    var message: String?
+        get() = _message
+        private set(value) {
+            _message = value
+            if (value != null) {
+                log.add(value)
+                if (log.size > MAX_LOG_ENTRIES) log.removeAt(0)
+            }
+        }
     var awaitingSwapTarget by mutableStateOf(false)
         private set
     var miniGameRequest by mutableStateOf<MiniGameRequest?>(null)
         private set
     val collapsedCells = mutableStateListOf<Int>()
+    /** Log ringkas setiap langkah/kejadian permainan, terbaru ditambahkan di akhir. */
+    val log = mutableStateListOf<String>()
     private var totalTurns = 0
 
     val currentPlayer: Player get() = players[currentPlayerIndex]
     private val isGameOver: Boolean get() = winner != null || coopComplete
+
+    companion object {
+        private const val MAX_LOG_ENTRIES = 60
+    }
 
     fun resolveMiniGame(success: Boolean) {
         miniGameRequest?.deferred?.complete(success)

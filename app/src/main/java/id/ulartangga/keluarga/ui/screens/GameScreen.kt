@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -53,6 +56,8 @@ import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+val BOTTOM_PANEL_HEIGHT = 150.dp
+
 @Composable
 fun GameScreen(
     engine: GameEngine,
@@ -71,12 +76,25 @@ fun GameScreen(
     val canAct = !engine.isBusy && engine.winner == null && !engine.coopComplete &&
         !current.isBot && !current.finished
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        BoardView(
-            players = engine.players,
-            theme = theme,
-            collapsedCells = engine.collapsedCells
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                BoardView(
+                    players = engine.players,
+                    theme = theme,
+                    collapsedCells = engine.collapsedCells
+                )
+            }
+
+            BottomInfoPanel(
+                log = engine.log,
+                players = engine.players,
+                currentPlayer = engine.currentPlayer
+            )
+        }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
             Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
@@ -124,7 +142,7 @@ fun GameScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp),
+                .padding(bottom = BOTTOM_PANEL_HEIGHT + 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (engine.doubleDiceActive) {
@@ -160,6 +178,103 @@ fun GameScreen(
 
         if (engine.coopComplete) {
             CoopCompleteDialog(onPlayAgain = onExit)
+        }
+    }
+}
+
+/** Panel bawah 2 kolom: log langkah (kiri) dan daftar karakter pemain (kanan), masing-masing 50% lebar. */
+@Composable
+fun BottomInfoPanel(log: List<String>, players: List<Player>, currentPlayer: Player, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(BOTTOM_PANEL_HEIGHT)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        MoveLogPanel(log = log, modifier = Modifier.weight(1f).fillMaxSize())
+        PlayerStatusList(
+            players = players,
+            currentPlayer = currentPlayer,
+            modifier = Modifier.weight(1f).fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun MoveLogPanel(log: List<String>, modifier: Modifier = Modifier) {
+    Surface(
+        color = Color.White.copy(alpha = 0.6f),
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier
+    ) {
+        if (log.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Belum ada langkah", style = MaterialTheme.typography.labelSmall)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(6.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                items(log.asReversed()) { entry ->
+                    Text(entry, style = MaterialTheme.typography.labelSmall, maxLines = 2)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PlayerStatusList(players: List<Player>, currentPlayer: Player, modifier: Modifier = Modifier) {
+    Surface(
+        color = Color.White.copy(alpha = 0.6f),
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(players) { player ->
+                val isTurn = player === currentPlayer
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            if (isTurn) player.color.copy(alpha = 0.3f) else Color.Transparent,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 6.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(22.dp)
+                            .clip(CircleShape)
+                            .background(player.color),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            player.avatar.initial.toString(),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        player.name.take(10),
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        if (player.finished) "🏁" else "#${player.position}",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
         }
     }
 }

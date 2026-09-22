@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,8 +47,21 @@ fun OnlineHostGameScreen(
     val myTurn = controller.isMyTurn() && engine.winner == null
     val current = engine.currentPlayer
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        BoardView(players = engine.players, theme = theme)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                BoardView(players = engine.players, theme = theme)
+            }
+
+            BottomInfoPanel(
+                log = engine.log,
+                players = engine.players,
+                currentPlayer = engine.currentPlayer
+            )
+        }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
             Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
@@ -87,7 +104,7 @@ fun OnlineHostGameScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp),
+                .padding(bottom = BOTTOM_PANEL_HEIGHT + 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (!myTurn && engine.winner == null) {
@@ -140,8 +157,29 @@ fun OnlineGuestGameScreen(
     val current = controller.players.firstOrNull { it.remoteId == controller.currentDeviceId }
         ?: controller.players.firstOrNull()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        BoardView(players = controller.players, theme = theme)
+    // Host mengirim satu ringkasan pesan per giliran; kumpulkan jadi log lokal di sisi tamu.
+    val guestLog = remember { mutableStateListOf<String>() }
+    LaunchedEffect(controller.message) {
+        controller.message?.let { guestLog.add(it) }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                BoardView(players = controller.players, theme = theme)
+            }
+
+            if (current != null) {
+                BottomInfoPanel(
+                    log = guestLog,
+                    players = controller.players,
+                    currentPlayer = current
+                )
+            }
+        }
 
         FloatingIconButton(onClick = onExit, modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) {
             Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar")
@@ -189,7 +227,7 @@ fun OnlineGuestGameScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = BOTTOM_PANEL_HEIGHT + 8.dp)
             )
         }
 
