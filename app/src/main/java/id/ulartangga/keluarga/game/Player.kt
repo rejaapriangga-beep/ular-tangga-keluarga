@@ -11,10 +11,17 @@ class Player(
     val name: String,
     val color: Color,
     val avatar: AnimalAvatar,
-    val isBot: Boolean
+    val isBot: Boolean,
+    val isYoungPlayer: Boolean = false
 ) {
     var position by mutableStateOf(1)
     var animatedCell by mutableStateOf(1)
     var lastRoll by mutableStateOf(0)
     val cards = mutableStateListOf<PowerCardType>()
+
+    init {
+        if (isYoungPlayer) {
+            cards.add(PowerCardType.SHIELD)
+        }
+    }
 }

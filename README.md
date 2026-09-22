@@ -26,11 +26,14 @@ Yang sudah ada di project ini:
 - Kotak Misteri (efek acak: maju/mundur 5 langkah, dapat kartu, tukar posisi acak, atau tidak ada efek).
 - Combo/Streak: dadu kembar dua kali berturut-turut untuk pemain yang sama memberi giliran ekstra.
 - Token karakter hewan (Singa, Panda, Kelinci, Dino), papan nama kayu untuk judul, dan backdrop vektor bertema di belakang papan.
+- Personalisasi pemain: nama & avatar bisa diedit per pemain di layar setup.
+- Mode "Pemain Muda": pemain yang ditandai mulai dengan kartu Perisai gratis dan Kotak Misteri tidak akan memberi efek mundur — bikin permainan lintas usia lebih seimbang.
 
 ## Roadmap (Fase berikutnya)
 
 - Mini-game singkat saat mendarat di kotak spesial.
 - Mode Co-op dan Battle Royale Mini.
+- Ritual harian (streak/reward harian).
 - Replay/highlight akhir permainan yang bisa dibagikan.
 - Multiplayer online.
 

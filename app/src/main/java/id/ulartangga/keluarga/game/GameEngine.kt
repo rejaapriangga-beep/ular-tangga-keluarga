@@ -162,7 +162,12 @@ class GameEngine(
 
     /** Mengembalikan true jika posisi pemain berpindah akibat efek Kotak Misteri. */
     private fun resolveMystery(player: Player): Boolean {
-        return when (MysteryOutcome.values().random()) {
+        val outcomePool = if (player.isYoungPlayer) {
+            MysteryOutcome.values().filter { it != MysteryOutcome.BACKWARD }
+        } else {
+            MysteryOutcome.values().toList()
+        }
+        return when (outcomePool.random()) {
             MysteryOutcome.FORWARD -> {
                 val newPos = (player.position + 5).coerceAtMost(100)
                 player.position = newPos
