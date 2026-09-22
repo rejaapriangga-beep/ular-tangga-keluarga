@@ -2,20 +2,31 @@ package id.ulartangga.keluarga.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+
+private val DICE_PIPS: Map<Int, List<Pair<Float, Float>>> = mapOf(
+    1 to listOf(0.5f to 0.5f),
+    2 to listOf(0.28f to 0.28f, 0.72f to 0.72f),
+    3 to listOf(0.28f to 0.28f, 0.5f to 0.5f, 0.72f to 0.72f),
+    4 to listOf(0.28f to 0.28f, 0.72f to 0.28f, 0.28f to 0.72f, 0.72f to 0.72f),
+    5 to listOf(0.28f to 0.28f, 0.72f to 0.28f, 0.5f to 0.5f, 0.28f to 0.72f, 0.72f to 0.72f),
+    6 to listOf(0.28f to 0.25f, 0.72f to 0.25f, 0.28f to 0.5f, 0.72f to 0.5f, 0.28f to 0.75f, 0.72f to 0.75f)
+)
 
 @Composable
 fun DiceView(
@@ -32,17 +43,27 @@ fun DiceView(
     )
     Box(
         modifier = modifier
-            .size(72.dp)
+            .size(76.dp)
             .graphicsLayer { rotationZ = rotation }
             .clip(RoundedCornerShape(16.dp))
-            .background(if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(enabled = enabled, onClick = onRoll),
-        contentAlignment = Alignment.Center
+            .background(Color.White)
+            .border(
+                width = 3.dp,
+                color = if (enabled) MaterialTheme.colorScheme.primary else Color(0xFFBDBDBD),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(enabled = enabled, onClick = onRoll)
     ) {
-        Text(
-            text = value.toString(),
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val pips = DICE_PIPS[value.coerceIn(1, 6)].orEmpty()
+            val pipRadius = size.minDimension * 0.09f
+            pips.forEach { (fx, fy) ->
+                drawCircle(
+                    color = Color(0xFF212121),
+                    radius = pipRadius,
+                    center = Offset(size.width * fx, size.height * fy)
+                )
+            }
+        }
     }
 }

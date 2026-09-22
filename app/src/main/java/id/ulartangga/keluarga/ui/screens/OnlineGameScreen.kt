@@ -47,7 +47,7 @@ fun OnlineHostGameScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(horizontal = 6.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -61,50 +61,51 @@ fun OnlineHostGameScreen(
                 WoodenSign(text = "Room $roomCode", style = MaterialTheme.typography.labelLarge)
                 Spacer(Modifier.width(48.dp))
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
 
             PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
 
             BoardView(
                 players = engine.players,
                 theme = theme,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp)
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
             engine.message?.let { msg ->
                 Text(msg, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
             }
 
             val myTurn = controller.isMyTurn() && engine.winner == null
             val current = engine.currentPlayer
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
             ) {
                 if (myTurn) {
                     CardTray(
                         player = current,
                         enabled = !engine.isBusy,
                         onUseDoubleDice = { engine.activateDoubleDice() },
-                        onUseSwap = { engine.beginSwap() }
+                        onUseSwap = { engine.beginSwap() },
+                        modifier = Modifier.align(Alignment.CenterStart)
                     )
                 }
                 DiceView(
                     value = engine.diceValue,
                     isRolling = engine.isBusy,
                     enabled = myTurn && !engine.isBusy,
-                    onRoll = { controller.rollAsHost() }
+                    onRoll = { controller.rollAsHost() },
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
             if (!myTurn && engine.winner == null) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 Text("Menunggu ${current.name} melempar dadu...", style = MaterialTheme.typography.bodyMedium)
             }
         }
@@ -149,7 +150,7 @@ fun OnlineGuestGameScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(horizontal = 6.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -163,25 +164,23 @@ fun OnlineGuestGameScreen(
                 WoodenSign(text = "Room $roomCode", style = MaterialTheme.typography.labelLarge)
                 Spacer(Modifier.width(48.dp))
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
 
             if (current != null) {
                 PlayersRow(players = controller.players, currentPlayer = current)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
             }
 
             BoardView(
                 players = controller.players,
                 theme = theme,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp)
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
             controller.message?.let { msg ->
                 Text(msg, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
             }
 
             DiceView(
@@ -192,7 +191,7 @@ fun OnlineGuestGameScreen(
             )
 
             if (!controller.isMyTurn && controller.winnerDeviceId == null) {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 Text("Menunggu ${current?.name ?: "pemain lain"} melempar dadu...", style = MaterialTheme.typography.bodyMedium)
             }
         }

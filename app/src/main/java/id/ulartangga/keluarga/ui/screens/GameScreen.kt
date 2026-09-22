@@ -63,47 +63,48 @@ fun GameScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(horizontal = 6.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TopBar(onExit = onExit, soundOn = soundOn, onToggleSound = onToggleSound)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
             PlayersRow(players = engine.players, currentPlayer = engine.currentPlayer)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
             BoardView(
                 players = engine.players,
                 theme = theme,
                 collapsedCells = engine.collapsedCells,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp)
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
             engine.message?.let { msg ->
                 Text(msg, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
             }
 
             val current = engine.currentPlayer
             val canAct = !engine.isBusy && engine.winner == null && !engine.coopComplete &&
                 !current.isBot && !current.finished
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
             ) {
                 CardTray(
                     player = current,
                     enabled = canAct,
                     onUseDoubleDice = { engine.activateDoubleDice() },
-                    onUseSwap = { engine.beginSwap() }
+                    onUseSwap = { engine.beginSwap() },
+                    modifier = Modifier.align(Alignment.CenterStart)
                 )
                 DiceView(
                     value = engine.diceValue,
                     isRolling = engine.isBusy,
                     enabled = canAct,
-                    onRoll = { scope.launch { engine.rollDice() } }
+                    onRoll = { scope.launch { engine.rollDice() } },
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
@@ -201,9 +202,10 @@ fun CardTray(
     player: Player,
     enabled: Boolean,
     onUseDoubleDice: () -> Unit,
-    onUseSwap: () -> Unit
+    onUseSwap: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         player.cards.forEach { card ->
             AssistChip(
                 onClick = {

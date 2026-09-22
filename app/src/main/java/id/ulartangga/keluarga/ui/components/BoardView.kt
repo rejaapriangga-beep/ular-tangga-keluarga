@@ -22,8 +22,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -35,6 +35,7 @@ import id.ulartangga.keluarga.game.BoardConfig
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 private data class CellGeometry(val row: Int, val col: Int, val center: Offset)
 
@@ -49,6 +50,65 @@ private fun cellGeometry(cell: Int, cellPx: Float): CellGeometry {
 }
 
 private fun cellCenter(cell: Int, cellPx: Float) = cellGeometry(cell, cellPx).center
+
+private fun quadraticPoint(p0: Offset, control: Offset, p1: Offset, t: Float): Offset {
+    val u = 1f - t
+    val x = u * u * p0.x + 2f * u * t * control.x + t * t * p1.x
+    val y = u * u * p0.y + 2f * u * t * control.y + t * t * p1.y
+    return Offset(x, y)
+}
+
+/** Tangga proper: dua rel sejajar dengan anak tangga melintang, bukan garis polos. */
+private fun DrawScope.drawLadder(a: Offset, b: Offset, theme: BoardTheme, cellPx: Float) {
+    val dir = Offset(b.x - a.x, b.y - a.y)
+    val length = sqrt(dir.x * dir.x + dir.y * dir.y)
+    if (length < 1f) return
+    val unit = Offset(dir.x / length, dir.y / length)
+    val perp = Offset(-unit.y, unit.x)
+    val railOffset = cellPx * 0.13f
+
+    val rail1Start = Offset(a.x + perp.x * railOffset, a.y + perp.y * railOffset)
+    val rail1End = Offset(b.x + perp.x * railOffset, b.y + perp.y * railOffset)
+    val rail2Start = Offset(a.x - perp.x * railOffset, a.y - perp.y * railOffset)
+    val rail2End = Offset(b.x - perp.x * railOffset, b.y - perp.y * railOffset)
+
+    val railWidth = cellPx * 0.07f
+    drawLine(theme.ladderColor, rail1Start, rail1End, strokeWidth = railWidth, cap = StrokeCap.Round)
+    drawLine(theme.ladderColor, rail2Start, rail2End, strokeWidth = railWidth, cap = StrokeCap.Round)
+
+    val rungCount = (length / (cellPx * 0.45f)).roundToInt().coerceAtLeast(3)
+    for (i in 1 until rungCount) {
+        val t = i / rungCount.toFloat()
+        val center = Offset(a.x + dir.x * t, a.y + dir.y * t)
+        val rungStart = Offset(center.x + perp.x * railOffset, center.y + perp.y * railOffset)
+        val rungEnd = Offset(center.x - perp.x * railOffset, center.y - perp.y * railOffset)
+        drawLine(theme.ladderRungColor, rungStart, rungEnd, strokeWidth = cellPx * 0.05f, cap = StrokeCap.Round)
+    }
+}
+
+/** Ular proper: badan menyegmen mengecil ke ekor, kepala bulat dengan mata. */
+private fun DrawScope.drawSnake(a: Offset, b: Offset, theme: BoardTheme, cellPx: Float) {
+    val control = Offset((a.x + b.x) / 2f + cellPx * 0.6f, (a.y + b.y) / 2f)
+    val segments = 28
+    val points = (0..segments).map { i -> quadraticPoint(a, control, b, i / segments.toFloat()) }
+
+    for (i in points.indices) {
+        val t = i / (points.size - 1).toFloat()
+        val radius = cellPx * (0.15f - 0.09f * t)
+        drawCircle(color = theme.snakeColor, radius = radius.coerceAtLeast(cellPx * 0.025f), center = points[i])
+    }
+
+    val head = points.first()
+    drawCircle(color = theme.snakeColor, radius = cellPx * 0.19f, center = head)
+    val eyeOffset = cellPx * 0.07f
+    val eyeLift = cellPx * 0.03f
+    val leftEye = Offset(head.x - eyeOffset, head.y - eyeLift)
+    val rightEye = Offset(head.x + eyeOffset, head.y - eyeLift)
+    drawCircle(color = Color.White, radius = cellPx * 0.04f, center = leftEye)
+    drawCircle(color = Color.White, radius = cellPx * 0.04f, center = rightEye)
+    drawCircle(color = Color.Black, radius = cellPx * 0.018f, center = leftEye)
+    drawCircle(color = Color.Black, radius = cellPx * 0.018f, center = rightEye)
+}
 
 @Composable
 fun BoardView(
@@ -136,7 +196,8 @@ fun BoardView(
                         topLeft.y + cellPx * 0.22f,
                         android.graphics.Paint().apply {
                             color = textColor
-                            textSize = cellPx * 0.16f
+                            textSize = cellPx * 0.19f
+                            isFakeBoldText = true
                         }
                     )
                 }
@@ -144,41 +205,30 @@ fun BoardView(
                 drawRect(color = theme.boardBorder, size = size, style = Stroke(width = 3f))
 
                 BoardConfig.ladders.forEach { (start, end) ->
-                    val a = cellCenter(start, cellPx)
-                    val b = cellCenter(end, cellPx)
-                    drawLine(theme.ladderColor, a, b, strokeWidth = cellPx * 0.14f, cap = StrokeCap.Round)
-                    drawLine(theme.ladderRungColor, a, b, strokeWidth = cellPx * 0.05f, cap = StrokeCap.Round)
+                    drawLadder(cellCenter(start, cellPx), cellCenter(end, cellPx), theme, cellPx)
                 }
 
                 BoardConfig.snakes.forEach { (start, end) ->
-                    val a = cellCenter(start, cellPx)
-                    val b = cellCenter(end, cellPx)
-                    val mid = Offset((a.x + b.x) / 2f + cellPx * 0.6f, (a.y + b.y) / 2f)
-                    val path = Path().apply {
-                        moveTo(a.x, a.y)
-                        quadraticBezierTo(mid.x, mid.y, b.x, b.y)
-                    }
-                    drawPath(path, color = theme.snakeColor, style = Stroke(width = cellPx * 0.12f, cap = StrokeCap.Round))
-                    drawCircle(color = theme.snakeColor, radius = cellPx * 0.1f, center = a)
+                    drawSnake(cellCenter(start, cellPx), cellCenter(end, cellPx), theme, cellPx)
                 }
             }
 
             players.forEachIndexed { index, player ->
                 val target = cellCenter(player.animatedCell, cellPx)
-                val jitterX = if (players.size > 1) ((index % 2) - 0.5f) * cellPx * 0.22f else 0f
-                val jitterY = if (players.size > 1) ((index / 2) - 0.5f) * cellPx * 0.22f else 0f
+                val jitterX = if (players.size > 1) ((index % 2) - 0.5f) * cellPx * 0.26f else 0f
+                val jitterY = if (players.size > 1) ((index / 2) - 0.5f) * cellPx * 0.26f else 0f
                 val animated by animateOffsetAsState(
                     targetValue = Offset(target.x + jitterX, target.y + jitterY),
                     animationSpec = tween(220),
                     label = "piece-${player.id}"
                 )
-                val pieceSizeDp = with(density) { (cellPx * 0.34f).toDp() }
+                val pieceSizeDp = with(density) { (cellPx * 0.46f).toDp() }
                 Box(
                     modifier = Modifier
                         .offset {
                             IntOffset(
-                                (animated.x - cellPx * 0.17f).roundToInt(),
-                                (animated.y - cellPx * 0.17f).roundToInt()
+                                (animated.x - cellPx * 0.23f).roundToInt(),
+                                (animated.y - cellPx * 0.23f).roundToInt()
                             )
                         }
                         .size(pieceSizeDp)
@@ -187,7 +237,7 @@ fun BoardView(
                         .border(2.dp, Color.White, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = player.avatar.emoji, fontSize = (pieceSizeDp.value * 0.6f).sp)
+                    Text(text = player.avatar.emoji, fontSize = (pieceSizeDp.value * 0.62f).sp)
                 }
             }
         }
