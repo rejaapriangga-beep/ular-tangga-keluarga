@@ -52,7 +52,7 @@ fun GameScreen(
 ) {
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(engine.currentPlayerIndex, engine.winner) {
+    LaunchedEffect(engine.turnToken, engine.winner) {
         engine.botTakeTurnIfNeeded()
     }
 

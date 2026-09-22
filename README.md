@@ -23,11 +23,12 @@ Yang sudah ada di project ini:
 - 3 power-card dasar (Perisai, Dadu Ganda, Tukar Posisi).
 - Toggle suara on/off.
 - 3 tema visual yang bisa dipilih di layar setup (Hutan Tropis, Kota Malam, Luar Angkasa).
+- Kotak Misteri (efek acak: maju/mundur 5 langkah, dapat kartu, tukar posisi acak, atau tidak ada efek).
+- Combo/Streak: dadu kembar dua kali berturut-turut untuk pemain yang sama memberi giliran ekstra.
 
 ## Roadmap (Fase berikutnya)
 
 - Mini-game singkat saat mendarat di kotak spesial.
-- Kotak Misteri acak & mekanik Combo/Streak (dadu kembar berturut-turut).
 - Mode Co-op dan Battle Royale Mini.
 - Replay/highlight akhir permainan yang bisa dibagikan.
 - Multiplayer online.

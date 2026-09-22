@@ -13,6 +13,8 @@ class GameEngine(
 ) {
     var currentPlayerIndex by mutableStateOf(0)
         private set
+    var turnToken by mutableStateOf(0)
+        private set
     var diceValue by mutableStateOf(1)
         private set
     var isBusy by mutableStateOf(false)
@@ -76,6 +78,9 @@ class GameEngine(
         onSound(SoundEvent.TICK)
         delay(500)
 
+        val isCombo = player.lastRoll != 0 && player.lastRoll == finalRoll
+        player.lastRoll = finalRoll
+
         val start = player.position
         val target = (start + finalRoll).coerceAtMost(100)
 
@@ -100,26 +105,9 @@ class GameEngine(
             delay(400)
         }
 
-        BoardConfig.ladders[target]?.let { end ->
-            delay(200)
-            player.animatedCell = end
-            player.position = end
-            message = "${player.name} naik tangga ke $end!"
-            onSound(SoundEvent.LADDER)
-            delay(400)
-        }
-
-        BoardConfig.snakes[target]?.let { end ->
-            if (player.cards.remove(PowerCardType.SHIELD)) {
-                message = "${player.name} kena ular tapi terlindungi Perisai!"
-                onSound(SoundEvent.CARD)
-            } else {
-                delay(200)
-                player.animatedCell = end
-                player.position = end
-                message = "${player.name} kena ular, turun ke $end!"
-                onSound(SoundEvent.SNAKE)
-            }
+        var mysteryMoved = false
+        if (target in BoardConfig.mysteryCells) {
+            mysteryMoved = resolveMystery(player)
             delay(400)
         }
 
@@ -130,8 +118,98 @@ class GameEngine(
             return
         }
 
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+        if (!mysteryMoved) {
+            BoardConfig.ladders[target]?.let { end ->
+                delay(200)
+                player.animatedCell = end
+                player.position = end
+                message = "${player.name} naik tangga ke $end!"
+                onSound(SoundEvent.LADDER)
+                delay(400)
+            }
+
+            BoardConfig.snakes[target]?.let { end ->
+                if (player.cards.remove(PowerCardType.SHIELD)) {
+                    message = "${player.name} kena ular tapi terlindungi Perisai!"
+                    onSound(SoundEvent.CARD)
+                } else {
+                    delay(200)
+                    player.animatedCell = end
+                    player.position = end
+                    message = "${player.name} kena ular, turun ke $end!"
+                    onSound(SoundEvent.SNAKE)
+                }
+                delay(400)
+            }
+        }
+
+        if (player.position == 100) {
+            onSound(SoundEvent.WIN)
+            winner = player
+            isBusy = false
+            return
+        }
+
+        if (isCombo) {
+            message = (message?.let { "$it " } ?: "") + "🔥 Dadu kembar! ${player.name} dapat giliran ekstra!"
+            onSound(SoundEvent.CARD)
+        } else {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size
+        }
+        turnToken++
         isBusy = false
+    }
+
+    /** Mengembalikan true jika posisi pemain berpindah akibat efek Kotak Misteri. */
+    private fun resolveMystery(player: Player): Boolean {
+        return when (MysteryOutcome.values().random()) {
+            MysteryOutcome.FORWARD -> {
+                val newPos = (player.position + 5).coerceAtMost(100)
+                player.position = newPos
+                player.animatedCell = newPos
+                message = "${player.name} kena Kotak Misteri: maju 5 langkah!"
+                onSound(SoundEvent.LADDER)
+                true
+            }
+            MysteryOutcome.BACKWARD -> {
+                val newPos = (player.position - 5).coerceAtLeast(1)
+                player.position = newPos
+                player.animatedCell = newPos
+                message = "${player.name} kena Kotak Misteri: mundur 5 langkah!"
+                onSound(SoundEvent.SNAKE)
+                true
+            }
+            MysteryOutcome.CARD -> {
+                if (player.cards.size < 3) {
+                    val newCard = PowerCardType.values().random()
+                    player.cards.add(newCard)
+                    message = "${player.name} kena Kotak Misteri: dapat kartu ${newCard.emoji} ${newCard.label}!"
+                } else {
+                    message = "${player.name} kena Kotak Misteri: untung kosong (kartu penuh)!"
+                }
+                onSound(SoundEvent.CARD)
+                false
+            }
+            MysteryOutcome.SWAP -> {
+                val target = players.filter { it !== player }.randomOrNull()
+                if (target != null) {
+                    val temp = player.position
+                    player.position = target.position
+                    target.position = temp
+                    player.animatedCell = player.position
+                    target.animatedCell = target.position
+                    message = "${player.name} kena Kotak Misteri: tukar posisi acak dengan ${target.name}!"
+                    onSound(SoundEvent.CARD)
+                    true
+                } else {
+                    false
+                }
+            }
+            MysteryOutcome.NOTHING -> {
+                message = "${player.name} kena Kotak Misteri: untung kosong!"
+                false
+            }
+        }
     }
 
     suspend fun botTakeTurnIfNeeded() {

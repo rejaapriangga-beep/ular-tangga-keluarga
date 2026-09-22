@@ -79,6 +79,19 @@ fun BoardView(players: List<Player>, theme: BoardTheme, modifier: Modifier = Mod
                     if (cell in BoardConfig.cardCells) {
                         drawCircle(color = theme.cardCellColor, radius = cellPx * 0.12f, center = geo.center)
                     }
+                    if (cell in BoardConfig.mysteryCells) {
+                        drawCircle(color = theme.mysteryCellColor, radius = cellPx * 0.16f, center = geo.center)
+                        drawContext.canvas.nativeCanvas.drawText(
+                            "?",
+                            geo.center.x - cellPx * 0.05f,
+                            geo.center.y + cellPx * 0.06f,
+                            android.graphics.Paint().apply {
+                                color = android.graphics.Color.WHITE
+                                textSize = cellPx * 0.2f
+                                isFakeBoldText = true
+                            }
+                        )
+                    }
                     drawContext.canvas.nativeCanvas.drawText(
                         cell.toString(),
                         topLeft.x + cellPx * 0.08f,

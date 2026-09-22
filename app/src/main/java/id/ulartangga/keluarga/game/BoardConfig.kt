@@ -12,4 +12,6 @@ object BoardConfig {
     )
 
     val cardCells: Set<Int> = setOf(5, 24, 33, 40, 58, 66, 77, 85, 93)
+
+    val mysteryCells: Set<Int> = setOf(3, 12, 20, 45, 55, 70, 82, 90, 97)
 }
