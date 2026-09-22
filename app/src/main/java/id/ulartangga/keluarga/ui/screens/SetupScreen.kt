@@ -2,6 +2,7 @@ package id.ulartangga.keluarga.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -203,6 +204,7 @@ private fun PlayerEditorRow(
 }
 
 /** Pemilih karakter (hewan/kerajaan/profesi), dikelompokkan per kategori. Karakter yang sudah dipakai pemain lain tidak bisa dipilih. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AvatarPicker(
     selected: AnimalAvatar,
