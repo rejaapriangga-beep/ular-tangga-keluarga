@@ -4,7 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.weight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,6 +31,7 @@ import id.ulartangga.keluarga.online.OnlineGuestController
 import id.ulartangga.keluarga.online.OnlineHostController
 import id.ulartangga.keluarga.online.RoomRepository
 import id.ulartangga.keluarga.sound.SoundManager
+import id.ulartangga.keluarga.ui.components.AdBannerPlaceholder
 import id.ulartangga.keluarga.ui.components.ThemeBackdrop
 import id.ulartangga.keluarga.ui.screens.GameScreen
 import id.ulartangga.keluarga.ui.screens.OnlineGuestGameScreen
@@ -77,76 +82,80 @@ fun UlarTanggaApp() {
 
     UlarTanggaTheme(boardTheme = boardTheme) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                if (screen !is AppScreen.Setup) {
-                    ThemeBackdrop(theme = boardTheme, modifier = Modifier.fillMaxSize())
-                }
+            Column(modifier = Modifier.fillMaxSize()) {
+                AdBannerPlaceholder(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.1f))
 
-                when (val current = screen) {
-                    is AppScreen.Setup -> SetupScreen(
-                        onStart = { players, mode ->
-                            pendingBonusCard?.let { card ->
-                                val recipient = players.firstOrNull { !it.isBot }
-                                if (recipient != null && recipient.cards.size < 3) {
-                                    recipient.cards.add(card)
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (screen !is AppScreen.Setup) {
+                        ThemeBackdrop(theme = boardTheme, modifier = Modifier.fillMaxSize())
+                    }
+
+                    when (val current = screen) {
+                        is AppScreen.Setup -> SetupScreen(
+                            onStart = { players, mode ->
+                                pendingBonusCard?.let { card ->
+                                    val recipient = players.firstOrNull { !it.isBot }
+                                    if (recipient != null && recipient.cards.size < 3) {
+                                        recipient.cards.add(card)
+                                    }
+                                    pendingBonusCard = null
                                 }
-                                pendingBonusCard = null
-                            }
-                            val engine = GameEngine(players, mode) { event ->
-                                if (soundOn) soundManager.play(event)
-                            }
-                            screen = AppScreen.Local(engine)
-                        },
-                        onPlayOnline = { screen = AppScreen.OnlineLobby }
-                    )
-
-                    is AppScreen.Local -> GameScreen(
-                        engine = current.engine,
-                        theme = boardTheme,
-                        soundOn = soundOn,
-                        onToggleSound = { soundOn = !soundOn },
-                        onExit = { screen = AppScreen.Setup }
-                    )
-
-                    is AppScreen.OnlineLobby -> OnlineLobbyScreen(
-                        myDeviceId = myDeviceId,
-                        repository = repository,
-                        onEnterRoom = { code, isHost, entries ->
-                            screen = if (isHost) {
-                                val controller = OnlineHostController(repository, code, entries, myDeviceId) { event ->
+                                val engine = GameEngine(players, mode) { event ->
                                     if (soundOn) soundManager.play(event)
                                 }
-                                AppScreen.OnlineHost(controller, code)
-                            } else {
-                                AppScreen.OnlineGuest(OnlineGuestController(repository, code, myDeviceId, entries), code)
+                                screen = AppScreen.Local(engine)
+                            },
+                            onPlayOnline = { screen = AppScreen.OnlineLobby }
+                        )
+
+                        is AppScreen.Local -> GameScreen(
+                            engine = current.engine,
+                            theme = boardTheme,
+                            soundOn = soundOn,
+                            onToggleSound = { soundOn = !soundOn },
+                            onExit = { screen = AppScreen.Setup }
+                        )
+
+                        is AppScreen.OnlineLobby -> OnlineLobbyScreen(
+                            myDeviceId = myDeviceId,
+                            repository = repository,
+                            onEnterRoom = { code, isHost, entries ->
+                                screen = if (isHost) {
+                                    val controller = OnlineHostController(repository, code, entries, myDeviceId) { event ->
+                                        if (soundOn) soundManager.play(event)
+                                    }
+                                    AppScreen.OnlineHost(controller, code)
+                                } else {
+                                    AppScreen.OnlineGuest(OnlineGuestController(repository, code, myDeviceId, entries), code)
+                                }
+                            },
+                            onBack = { screen = AppScreen.Setup }
+                        )
+
+                        is AppScreen.OnlineHost -> OnlineHostGameScreen(
+                            controller = current.controller,
+                            roomCode = current.roomCode,
+                            theme = boardTheme,
+                            onExit = { screen = AppScreen.Setup }
+                        )
+
+                        is AppScreen.OnlineGuest -> OnlineGuestGameScreen(
+                            controller = current.controller,
+                            roomCode = current.roomCode,
+                            theme = boardTheme,
+                            onExit = { screen = AppScreen.Setup }
+                        )
+                    }
+
+                    dailyReward?.let { result ->
+                        DailyRewardDialog(
+                            result = result,
+                            onClaim = {
+                                pendingBonusCard = result.reward
+                                dailyReward = null
                             }
-                        },
-                        onBack = { screen = AppScreen.Setup }
-                    )
-
-                    is AppScreen.OnlineHost -> OnlineHostGameScreen(
-                        controller = current.controller,
-                        roomCode = current.roomCode,
-                        theme = boardTheme,
-                        onExit = { screen = AppScreen.Setup }
-                    )
-
-                    is AppScreen.OnlineGuest -> OnlineGuestGameScreen(
-                        controller = current.controller,
-                        roomCode = current.roomCode,
-                        theme = boardTheme,
-                        onExit = { screen = AppScreen.Setup }
-                    )
-                }
-
-                dailyReward?.let { result ->
-                    DailyRewardDialog(
-                        result = result,
-                        onClaim = {
-                            pendingBonusCard = result.reward
-                            dailyReward = null
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
