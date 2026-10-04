@@ -36,14 +36,14 @@ const AVATARS = [
 const COLORS = ["#E53935", "#1E88E5", "#43A047", "#FDD835"];
 
 const COLUMNS = 7;
-const ROWS = 12;
+const ROWS = 10;
 const TOTAL_CELLS = COLUMNS * ROWS;
 
-const LADDERS = { 4: 18, 10: 24, 17: 31, 26: 40, 34: 48, 44: 58, 55: 70, 63: 78 };
-const SNAKES = { 15: 3, 25: 9, 37: 20, 47: 29, 57: 39, 69: 50, 79: 61, 82: 64 };
-const CARD_CELLS = new Set([6, 13, 22, 32, 42, 52, 62, 72]);
-const MYSTERY_CELLS = new Set([8, 19, 28, 38, 49, 60, 71, 80]);
-const MINIGAME_CELLS = new Set([7, 16, 23, 36, 46, 56, 66, 76]);
+const LADDERS = { 4: 18, 11: 25, 20: 33, 29: 43, 39: 53, 48: 62 };
+const SNAKES = { 17: 5, 27: 14, 41: 24, 51: 36, 61: 45, 68: 58 };
+const CARD_CELLS = new Set([7, 15, 23, 32, 44, 55, 65]);
+const MYSTERY_CELLS = new Set([9, 19, 31, 42, 50, 64]);
+const MINIGAME_CELLS = new Set([6, 21, 35, 46, 59]);
 
 function getDeviceId() {
   let id = localStorage.getItem("deviceId");
