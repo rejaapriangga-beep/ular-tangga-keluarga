@@ -103,23 +103,6 @@ fun OnlineHostGameScreen(
                 .padding(top = 56.dp)
         )
 
-        engine.message?.let { msg ->
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 112.dp, start = 16.dp, end = 16.dp)
-            ) {
-                Text(
-                    msg,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                )
-            }
-        }
-
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
                 players = engine.players.filter { it !== engine.currentPlayer },
@@ -210,23 +193,6 @@ fun OnlineGuestGameScreen(
                     .align(Alignment.TopCenter)
                     .padding(top = 56.dp)
             )
-        }
-
-        controller.message?.let { msg ->
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 112.dp, start = 16.dp, end = 16.dp)
-            ) {
-                Text(
-                    msg,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                )
-            }
         }
 
         controller.winnerDeviceId?.let { winnerId ->
