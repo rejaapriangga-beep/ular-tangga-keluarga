@@ -80,6 +80,8 @@ fun OnlineHostGameScreen(
                     )
                     Spacer(Modifier.height(6.dp))
                 }
+                TurnPopup(turnKey = engine.turnToken, currentPlayer = engine.currentPlayer)
+                DiceMessagePopup(message = engine.message)
                 DiceView(
                     value = engine.diceValue,
                     isRolling = engine.isBusy,
@@ -94,14 +96,6 @@ fun OnlineHostGameScreen(
             Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar", modifier = Modifier.size(16.dp))
         }
         RoomCodeBadge(roomCode = roomCode, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
-
-        TurnPopup(
-            turnKey = engine.turnToken,
-            currentPlayer = engine.currentPlayer,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 56.dp)
-        )
 
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
@@ -169,6 +163,8 @@ fun OnlineGuestGameScreen(
                         )
                         Spacer(Modifier.height(4.dp))
                     }
+                    TurnPopup(turnKey = controller.currentDeviceId, currentPlayer = current)
+                    DiceMessagePopup(message = controller.message)
                     DiceView(
                         value = controller.diceValue,
                         isRolling = controller.isBusy,
@@ -184,16 +180,6 @@ fun OnlineGuestGameScreen(
             Icon(Icons.Filled.ArrowBack, contentDescription = "Keluar", modifier = Modifier.size(16.dp))
         }
         RoomCodeBadge(roomCode = roomCode, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
-
-        if (current != null) {
-            TurnPopup(
-                turnKey = controller.currentDeviceId,
-                currentPlayer = current,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 56.dp)
-            )
-        }
 
         controller.winnerDeviceId?.let { winnerId ->
             val winner = controller.players.firstOrNull { it.remoteId == winnerId }

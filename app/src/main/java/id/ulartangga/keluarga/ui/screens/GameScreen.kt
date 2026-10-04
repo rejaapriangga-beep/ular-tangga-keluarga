@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.game.GameEngine
@@ -111,6 +112,8 @@ fun GameScreen(
                     onUseSwap = { engine.beginSwap() }
                 )
                 Spacer(Modifier.height(6.dp))
+                TurnPopup(turnKey = engine.turnToken, currentPlayer = engine.currentPlayer)
+                DiceMessagePopup(message = engine.message)
                 DiceView(
                     value = engine.diceValue,
                     isRolling = engine.isBusy,
@@ -131,14 +134,6 @@ fun GameScreen(
                 modifier = Modifier.size(16.dp)
             )
         }
-
-        TurnPopup(
-            turnKey = engine.turnToken,
-            currentPlayer = engine.currentPlayer,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 56.dp)
-        )
 
         if (engine.awaitingSwapTarget) {
             SwapTargetDialog(
@@ -307,36 +302,37 @@ fun FloatingIconButton(onClick: () -> Unit, modifier: Modifier = Modifier, conte
 fun TurnIndicator(currentPlayer: Player, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(currentPlayer.color.copy(alpha = 0.95f))
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(30.dp)
+                .size(16.dp)
                 .clip(CircleShape)
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 currentPlayer.avatar.initial.toString(),
-                fontSize = 15.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 color = currentPlayer.color
             )
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(4.dp))
         Text(
             "Giliran ${currentPlayer.name}",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White,
+            maxLines = 1
         )
     }
 }
 
-/** Info giliran ditampilkan sebagai popup singkat (bukan bar permanen) supaya papan mendapat ruang vertikal lebih. */
+/** Info giliran ditampilkan sebagai popup singkat dekat dadu (bukan bar permanen di atas papan). */
 @Composable
 fun TurnPopup(turnKey: Any?, currentPlayer: Player, modifier: Modifier = Modifier) {
     var visible by remember { mutableStateOf(true) }
@@ -351,7 +347,48 @@ fun TurnPopup(turnKey: Any?, currentPlayer: Player, modifier: Modifier = Modifie
         exit = fadeOut(),
         modifier = modifier
     ) {
-        TurnIndicator(currentPlayer = currentPlayer)
+        Column {
+            TurnIndicator(currentPlayer = currentPlayer)
+            Spacer(Modifier.height(4.dp))
+        }
+    }
+}
+
+/** Hasil lemparan dadu & efek langkah ditampilkan sebagai popup singkat tepat di atas dadu. */
+@Composable
+fun DiceMessagePopup(message: String?, modifier: Modifier = Modifier) {
+    var visible by remember { mutableStateOf(false) }
+    var shown by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(message) {
+        if (message != null) {
+            shown = message
+            visible = true
+            delay(2200)
+            visible = false
+        }
+    }
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = modifier
+    ) {
+        Column {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    shown ?: "",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+            Spacer(Modifier.height(4.dp))
+        }
     }
 }
 
