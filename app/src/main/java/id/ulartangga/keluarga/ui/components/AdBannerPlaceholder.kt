@@ -25,9 +25,9 @@ fun AdBannerPlaceholder(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Contoh Ruang Iklan (Banner 10% Tinggi Layar)",
+            text = "Contoh Ruang Iklan (Banner 6% Tinggi Layar)",
             color = Color(0xFF757575),
-            fontSize = 13.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Medium
         )
     }

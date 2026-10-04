@@ -82,7 +82,7 @@ fun UlarTanggaApp() {
     UlarTanggaTheme(boardTheme = boardTheme) {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(modifier = Modifier.fillMaxSize()) {
-                AdBannerPlaceholder(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.1f))
+                AdBannerPlaceholder(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.06f))
 
                 Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     if (screen !is AppScreen.Setup) {
