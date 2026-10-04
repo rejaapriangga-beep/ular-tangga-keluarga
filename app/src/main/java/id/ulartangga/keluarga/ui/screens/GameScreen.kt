@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.game.GameEngine
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.game.PowerCardType
+import id.ulartangga.keluarga.ui.components.BoardLegend
 import id.ulartangga.keluarga.ui.components.BoardView
 import id.ulartangga.keluarga.ui.components.DiceView
 import id.ulartangga.keluarga.ui.components.MiniGameDialog
@@ -85,15 +87,14 @@ fun GameScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(Modifier.height(TOP_SPACER_HEIGHT))
-            Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
+            Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 BoardView(
                     players = engine.players,
                     theme = theme,
-                    collapsedCells = engine.collapsedCells
+                    collapsedCells = engine.collapsedCells,
+                    modifier = Modifier.weight(2.6f).fillMaxHeight()
                 )
+                BoardLegend(theme = theme, modifier = Modifier.weight(1f).fillMaxHeight())
             }
 
             BottomInfoPanel(

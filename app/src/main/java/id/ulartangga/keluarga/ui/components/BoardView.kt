@@ -5,10 +5,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,24 +41,25 @@ import id.ulartangga.keluarga.game.BoardConfig
 import id.ulartangga.keluarga.game.Player
 import id.ulartangga.keluarga.ui.theme.BoardTheme
 import kotlin.math.atan2
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 private data class CellGeometry(val row: Int, val col: Int, val center: Offset)
 
-private fun cellGeometry(cell: Int, cellPx: Float): CellGeometry {
+private fun cellGeometry(cell: Int, cellW: Float, cellH: Float): CellGeometry {
     val columns = BoardConfig.COLUMNS
     val rows = BoardConfig.ROWS
     val idx = (cell - 1).coerceIn(0, BoardConfig.TOTAL_CELLS - 1)
     val row = idx / columns
     var col = idx % columns
     if (row % 2 == 1) col = columns - 1 - col
-    val x = col * cellPx + cellPx / 2f
-    val y = (rows - 1 - row) * cellPx + cellPx / 2f
+    val x = col * cellW + cellW / 2f
+    val y = (rows - 1 - row) * cellH + cellH / 2f
     return CellGeometry(row, col, Offset(x, y))
 }
 
-private fun cellCenter(cell: Int, cellPx: Float) = cellGeometry(cell, cellPx).center
+private fun cellCenter(cell: Int, cellW: Float, cellH: Float) = cellGeometry(cell, cellW, cellH).center
 
 private fun quadraticPoint(p0: Offset, control: Offset, p1: Offset, t: Float): Offset {
     val u = 1f - t
@@ -68,16 +69,17 @@ private fun quadraticPoint(p0: Offset, control: Offset, p1: Offset, t: Float): O
 }
 
 /** Pola garis finish (kotak-kotak hitam putih ala bendera balap) di kotak terakhir. */
-private fun DrawScope.drawFinishPattern(topLeft: Offset, cellPx: Float) {
+private fun DrawScope.drawFinishPattern(topLeft: Offset, cellW: Float, cellH: Float) {
     val divisions = 4
-    val sub = cellPx / divisions
+    val subW = cellW / divisions
+    val subH = cellH / divisions
     for (row in 0 until divisions) {
         for (col in 0 until divisions) {
             val isBlack = (row + col) % 2 == 0
             drawRect(
                 color = if (isBlack) Color.Black else Color.White,
-                topLeft = Offset(topLeft.x + col * sub, topLeft.y + row * sub),
-                size = Size(sub, sub)
+                topLeft = Offset(topLeft.x + col * subW, topLeft.y + row * subH),
+                size = Size(subW, subH)
             )
         }
     }
@@ -199,6 +201,10 @@ private fun DrawScope.drawSnake(a: Offset, b: Offset, theme: BoardTheme, cellPx:
     }
 }
 
+/**
+ * Papan mengisi penuh kotak yang disediakan (lebar & tinggi dipakai apa adanya, dempet ke kiri),
+ * sehingga kotak tidak selalu persegi (cellWidth != cellHeight) tapi tidak ada sisa ruang kosong.
+ */
 @Composable
 fun BoardView(
     players: List<Player>,
@@ -206,7 +212,8 @@ fun BoardView(
     modifier: Modifier = Modifier,
     collapsedCells: List<Int> = emptyList()
 ) {
-    var boardPx by remember { mutableStateOf(0f) }
+    var boardWidthPx by remember { mutableStateOf(0f) }
+    var boardHeightPx by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
     val textColor = android.graphics.Color.argb(
         140,
@@ -217,54 +224,55 @@ fun BoardView(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(
-                BoardConfig.COLUMNS.toFloat() / BoardConfig.ROWS.toFloat(),
-                matchHeightConstraintsFirst = true
-            )
-            .onGloballyPositioned { coords -> boardPx = coords.size.width.toFloat() }
+            .fillMaxSize()
+            .onGloballyPositioned { coords ->
+                boardWidthPx = coords.size.width.toFloat()
+                boardHeightPx = coords.size.height.toFloat()
+            }
     ) {
-        if (boardPx > 0f) {
-            val cellPx = boardPx / BoardConfig.COLUMNS.toFloat()
+        if (boardWidthPx > 0f && boardHeightPx > 0f) {
+            val cellW = boardWidthPx / BoardConfig.COLUMNS.toFloat()
+            val cellH = boardHeightPx / BoardConfig.ROWS.toFloat()
+            val cellMin = min(cellW, cellH)
 
             Canvas(modifier = Modifier.matchParentSize()) {
                 for (cell in 1..BoardConfig.TOTAL_CELLS) {
-                    val geo = cellGeometry(cell, cellPx)
-                    val topLeft = Offset(geo.center.x - cellPx / 2f, geo.center.y - cellPx / 2f)
+                    val geo = cellGeometry(cell, cellW, cellH)
+                    val topLeft = Offset(geo.center.x - cellW / 2f, geo.center.y - cellH / 2f)
                     val isEven = (geo.row + geo.col) % 2 == 0
                     drawRect(
                         color = if (isEven) theme.boardLight else theme.boardDark,
                         topLeft = topLeft,
-                        size = Size(cellPx, cellPx)
+                        size = Size(cellW, cellH)
                     )
                     if (cell == BoardConfig.TOTAL_CELLS) {
-                        drawFinishPattern(topLeft, cellPx)
+                        drawFinishPattern(topLeft, cellW, cellH)
                     }
                     if (cell in BoardConfig.cardCells) {
-                        drawCircle(color = theme.cardCellColor, radius = cellPx * 0.12f, center = geo.center)
+                        drawCircle(color = theme.cardCellColor, radius = cellMin * 0.12f, center = geo.center)
                     }
                     if (cell in BoardConfig.mysteryCells) {
-                        drawCircle(color = theme.mysteryCellColor, radius = cellPx * 0.16f, center = geo.center)
+                        drawCircle(color = theme.mysteryCellColor, radius = cellMin * 0.16f, center = geo.center)
                         drawContext.canvas.nativeCanvas.drawText(
                             "?",
-                            geo.center.x - cellPx * 0.05f,
-                            geo.center.y + cellPx * 0.06f,
+                            geo.center.x - cellMin * 0.05f,
+                            geo.center.y + cellMin * 0.06f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.WHITE
-                                textSize = cellPx * 0.2f
+                                textSize = cellMin * 0.2f
                                 isFakeBoldText = true
                             }
                         )
                     }
                     if (cell in BoardConfig.miniGameCells) {
-                        drawCircle(color = theme.miniGameCellColor, radius = cellPx * 0.16f, center = geo.center)
+                        drawCircle(color = theme.miniGameCellColor, radius = cellMin * 0.16f, center = geo.center)
                         drawContext.canvas.nativeCanvas.drawText(
                             "⚡",
-                            geo.center.x - cellPx * 0.07f,
-                            geo.center.y + cellPx * 0.07f,
+                            geo.center.x - cellMin * 0.07f,
+                            geo.center.y + cellMin * 0.07f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.WHITE
-                                textSize = cellPx * 0.2f
+                                textSize = cellMin * 0.2f
                                 isFakeBoldText = true
                             }
                         )
@@ -273,30 +281,30 @@ fun BoardView(
                         drawRect(
                             color = Color(0xAA1A1A1A),
                             topLeft = topLeft,
-                            size = Size(cellPx, cellPx)
+                            size = Size(cellW, cellH)
                         )
                         drawContext.canvas.nativeCanvas.drawText(
                             "✕",
-                            geo.center.x - cellPx * 0.08f,
-                            geo.center.y + cellPx * 0.08f,
+                            geo.center.x - cellMin * 0.08f,
+                            geo.center.y + cellMin * 0.08f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.RED
-                                textSize = cellPx * 0.28f
+                                textSize = cellMin * 0.28f
                                 isFakeBoldText = true
                             }
                         )
                     }
                     drawContext.canvas.nativeCanvas.drawText(
                         cell.toString(),
-                        topLeft.x + cellPx * 0.08f,
-                        topLeft.y + cellPx * 0.22f,
+                        topLeft.x + cellMin * 0.08f,
+                        topLeft.y + cellMin * 0.22f,
                         android.graphics.Paint().apply {
                             color = if (cell == BoardConfig.TOTAL_CELLS) {
                                 android.graphics.Color.parseColor("#FFEB3B")
                             } else {
                                 textColor
                             }
-                            textSize = cellPx * 0.19f
+                            textSize = cellMin * 0.19f
                             isFakeBoldText = true
                         }
                     )
@@ -305,29 +313,30 @@ fun BoardView(
                 drawRect(color = theme.boardBorder, size = size, style = Stroke(width = 3f))
 
                 BoardConfig.ladders.forEach { (start, end) ->
-                    drawLadder(cellCenter(start, cellPx), cellCenter(end, cellPx), theme, cellPx)
+                    drawLadder(cellCenter(start, cellW, cellH), cellCenter(end, cellW, cellH), theme, cellMin)
                 }
 
                 BoardConfig.snakes.forEach { (start, end) ->
-                    drawSnake(cellCenter(start, cellPx), cellCenter(end, cellPx), theme, cellPx)
+                    drawSnake(cellCenter(start, cellW, cellH), cellCenter(end, cellW, cellH), theme, cellMin)
                 }
             }
 
             players.forEachIndexed { index, player ->
-                val target = cellCenter(player.animatedCell, cellPx)
-                val jitterX = if (players.size > 1) ((index % 2) - 0.5f) * cellPx * 0.26f else 0f
-                val jitterY = if (players.size > 1) ((index / 2) - 0.5f) * cellPx * 0.26f else 0f
+                val target = cellCenter(player.animatedCell, cellW, cellH)
+                val jitterX = if (players.size > 1) ((index % 2) - 0.5f) * cellW * 0.26f else 0f
+                val jitterY = if (players.size > 1) ((index / 2) - 0.5f) * cellH * 0.26f else 0f
                 val animated by animateOffsetAsState(
                     targetValue = Offset(target.x + jitterX, target.y + jitterY),
                     animationSpec = tween(220),
                     label = "piece-${player.id}"
                 )
-                val pieceSizeDp = with(density) { (cellPx * 0.58f).toDp() }
+                val pieceSizePx = cellMin * 0.58f
+                val pieceSizeDp = with(density) { pieceSizePx.toDp() }
                 Column(
                     modifier = Modifier.offset {
                         IntOffset(
-                            (animated.x - cellPx * 0.29f).roundToInt(),
-                            (animated.y - cellPx * 0.29f).roundToInt()
+                            (animated.x - pieceSizePx / 2f).roundToInt(),
+                            (animated.y - pieceSizePx / 2f).roundToInt()
                         )
                     },
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -357,5 +366,39 @@ fun BoardView(
                 }
             }
         }
+    }
+}
+
+/** Kolom keterangan simbol papan, ditampilkan di sisi kanan papan yang dempet ke kiri. */
+@Composable
+fun BoardLegend(theme: BoardTheme, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(Color.White)
+            .border(2.dp, theme.boardBorder)
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Text(
+            "KETERANGAN",
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Bold,
+            color = theme.boardBorder
+        )
+        LegendItem("🪜", "Tangga")
+        LegendItem("🐍", "Ular")
+        LegendItem("🎴", "Kartu")
+        LegendItem("❓", "Misteri")
+        LegendItem("⚡", "Mini-Game")
+        LegendItem("🏁", "Finish")
+    }
+}
+
+@Composable
+private fun LegendItem(emoji: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(emoji, fontSize = 18.sp)
+        Text(label, fontSize = 9.sp, color = Color(0xFF555555))
     }
 }

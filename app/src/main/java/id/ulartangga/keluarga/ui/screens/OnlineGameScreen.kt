@@ -2,7 +2,9 @@ package id.ulartangga.keluarga.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import id.ulartangga.keluarga.online.OnlineGuestController
 import id.ulartangga.keluarga.online.OnlineHostController
+import id.ulartangga.keluarga.ui.components.BoardLegend
 import id.ulartangga.keluarga.ui.components.BoardView
 import id.ulartangga.keluarga.ui.components.DiceView
 import id.ulartangga.keluarga.ui.components.MiniGameDialog
@@ -51,11 +54,13 @@ fun OnlineHostGameScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(Modifier.height(TOP_SPACER_HEIGHT))
-            Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                BoardView(players = engine.players, theme = theme)
+            Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                BoardView(
+                    players = engine.players,
+                    theme = theme,
+                    modifier = Modifier.weight(2.6f).fillMaxHeight()
+                )
+                BoardLegend(theme = theme, modifier = Modifier.weight(1f).fillMaxHeight())
             }
 
             BottomInfoPanel(
@@ -142,11 +147,13 @@ fun OnlineGuestGameScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(Modifier.height(TOP_SPACER_HEIGHT))
-            Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                BoardView(players = controller.players, theme = theme)
+            Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                BoardView(
+                    players = controller.players,
+                    theme = theme,
+                    modifier = Modifier.weight(2.6f).fillMaxHeight()
+                )
+                BoardLegend(theme = theme, modifier = Modifier.weight(1f).fillMaxHeight())
             }
 
             if (current != null) {
