@@ -92,5 +92,6 @@ Fitur Main Online butuh project Firebase milik kamu sendiri (gratis untuk skala 
 4. Salin nilai `apiKey`, `appId`, `projectId`, dan `databaseURL` dari config yang muncul.
 5. Tempel ke `app/src/main/java/id/ulartangga/keluarga/online/FirebaseConfig.kt`, isi 4 konstanta di sana.
 6. Commit & push — CI akan build ulang otomatis, dan tombol "Main Online" di app akan aktif.
+7. **Penting, lakukan sebelum 30 hari berlalu:** aturan "test mode" di langkah 2 otomatis kedaluwarsa 30 hari setelah database dibuat (Firebase akan mengirim email peringatan "expiring in 3 day(s)") — setelah itu semua akses dari app diblokir dan Main Online berhenti berfungsi. Supaya tidak kedaluwarsa, publish rules sendiri: buka **Build → Realtime Database → tab Rules**, ganti isinya dengan isi file [`database.rules.json`](database.rules.json) di root repo ini, lalu klik **Publish**. Isinya tetap membuka akses baca/tulis ke `rooms/{kode}` tanpa login (sesuai desain v1 — dilindungi kode room, bukan akun), tapi begitu dipublish manual, countdown kedaluwarsa test-mode berhenti berlaku.
 
-Tanpa langkah di atas, aplikasi tetap berjalan normal (semua fitur offline utuh) — tombol Main Online hanya akan menampilkan pesan bahwa fitur belum dikonfigurasi.
+Tanpa langkah 1-6, aplikasi tetap berjalan normal (semua fitur offline utuh) — tombol Main Online hanya akan menampilkan pesan bahwa fitur belum dikonfigurasi.
