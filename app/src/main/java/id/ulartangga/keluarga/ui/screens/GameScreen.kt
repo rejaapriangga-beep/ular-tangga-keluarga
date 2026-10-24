@@ -103,7 +103,12 @@ fun GameScreen(
                 currentPlayer = engine.currentPlayer
             ) {
                 if (engine.doubleDiceActive) {
-                    Text("Dadu Ganda aktif!", color = MaterialTheme.colorScheme.tertiary, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        "Dadu Ganda aktif!",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                     Spacer(Modifier.height(4.dp))
                 }
                 CardTray(
@@ -202,13 +207,13 @@ fun MoveLogPanel(log: List<String>, players: List<Player>, modifier: Modifier = 
     ) {
         if (log.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Belum ada langkah", style = MaterialTheme.typography.labelSmall)
+                Text("Belum ada langkah", fontSize = 12.sp)
             }
         } else {
             val reversedLog = log.asReversed()
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(6.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 itemsIndexed(reversedLog) { index, entry ->
                     val player = players.firstOrNull { entry.startsWith(it.name) }
@@ -218,11 +223,13 @@ fun MoveLogPanel(log: List<String>, players: List<Player>, modifier: Modifier = 
                         null
                     }
                     if (index > 0 && previousPlayer !== player) {
-                        Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(7.dp))
                     }
                     Text(
                         entry,
-                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
+                        lineHeight = 15.sp,
+                        fontWeight = FontWeight.Medium,
                         color = player?.color ?: MaterialTheme.colorScheme.onSurface,
                         maxLines = 2
                     )
@@ -257,14 +264,14 @@ fun PlayerStatusList(players: List<Player>, currentPlayer: Player, modifier: Mod
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(22.dp)
+                            .size(26.dp)
                             .clip(CircleShape)
                             .background(player.color),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             player.avatar.initial.toString(),
-                            fontSize = 11.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -272,13 +279,15 @@ fun PlayerStatusList(players: List<Player>, currentPlayer: Player, modifier: Mod
                     Spacer(Modifier.width(6.dp))
                     Text(
                         player.name.take(10),
-                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         modifier = Modifier.weight(1f)
                     )
                     Text(
                         if (player.finished) "🏁" else "#${player.position}",
-                        style = MaterialTheme.typography.labelSmall
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -311,22 +320,23 @@ fun TurnIndicator(currentPlayer: Player, modifier: Modifier = Modifier) {
     ) {
         Box(
             modifier = Modifier
-                .size(16.dp)
+                .size(20.dp)
                 .clip(CircleShape)
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 currentPlayer.avatar.initial.toString(),
-                fontSize = 9.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = currentPlayer.color
             )
         }
-        Spacer(Modifier.width(4.dp))
+        Spacer(Modifier.width(5.dp))
         Text(
             "Giliran ${currentPlayer.name}",
-            style = MaterialTheme.typography.labelSmall,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
             color = Color.White,
             maxLines = 1
         )
@@ -339,7 +349,7 @@ fun TurnPopup(turnKey: Any?, currentPlayer: Player, modifier: Modifier = Modifie
     var visible by remember { mutableStateOf(true) }
     LaunchedEffect(turnKey) {
         visible = true
-        delay(1600)
+        delay(2400)
         visible = false
     }
     AnimatedVisibility(
@@ -364,7 +374,7 @@ fun DiceMessagePopup(message: String?, modifier: Modifier = Modifier) {
         if (message != null) {
             shown = message
             visible = true
-            delay(2200)
+            delay(3200)
             visible = false
         }
     }
@@ -381,7 +391,9 @@ fun DiceMessagePopup(message: String?, modifier: Modifier = Modifier) {
             ) {
                 Text(
                     shown ?: "",
-                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 12.sp,
+                    lineHeight = 15.sp,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     textAlign = TextAlign.Center,
                     maxLines = 2,

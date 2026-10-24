@@ -25,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import id.ulartangga.keluarga.online.OnlineGuestController
 import id.ulartangga.keluarga.online.OnlineHostController
 import id.ulartangga.keluarga.ui.components.BoardLegend
@@ -71,7 +73,8 @@ fun OnlineHostGameScreen(
                 if (!myTurn && engine.winner == null) {
                     Text(
                         "Menunggu ${current.name}...",
-                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
                         maxLines = 1
                     )
                     Spacer(Modifier.height(4.dp))
@@ -165,7 +168,8 @@ fun OnlineGuestGameScreen(
                     if (!controller.isMyTurn && controller.winnerDeviceId == null) {
                         Text(
                             "Menunggu ${current.name}...",
-                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
                             maxLines = 1
                         )
                         Spacer(Modifier.height(4.dp))

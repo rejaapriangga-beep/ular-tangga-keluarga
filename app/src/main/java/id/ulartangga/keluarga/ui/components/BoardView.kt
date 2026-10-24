@@ -85,117 +85,166 @@ private fun DrawScope.drawFinishPattern(topLeft: Offset, cellW: Float, cellH: Fl
     }
 }
 
-/** Tangga proper: dua rel sejajar dengan anak tangga melintang, bukan garis polos. */
+/** Tangga proper: dua rel sejajar dengan anak tangga melintang, dibuat terlihat seperti kayu 3D (bayangan + kilau) supaya lebih jelas & menarik. */
 private fun DrawScope.drawLadder(a: Offset, b: Offset, theme: BoardTheme, cellPx: Float) {
     val dir = Offset(b.x - a.x, b.y - a.y)
     val length = sqrt(dir.x * dir.x + dir.y * dir.y)
     if (length < 1f) return
     val unit = Offset(dir.x / length, dir.y / length)
     val perp = Offset(-unit.y, unit.x)
-    val railOffset = cellPx * 0.13f
+    val railOffset = cellPx * 0.16f
+    val railWidth = cellPx * 0.095f
+    val shadowDelta = Offset(unit.y * cellPx * 0.025f, -unit.x * cellPx * 0.025f + cellPx * 0.02f)
+    val shadowColor = Color(0xFF3E2512).copy(alpha = 0.4f)
+    val highlightColor = Color.White.copy(alpha = 0.4f)
 
     val rail1Start = Offset(a.x + perp.x * railOffset, a.y + perp.y * railOffset)
     val rail1End = Offset(b.x + perp.x * railOffset, b.y + perp.y * railOffset)
     val rail2Start = Offset(a.x - perp.x * railOffset, a.y - perp.y * railOffset)
     val rail2End = Offset(b.x - perp.x * railOffset, b.y - perp.y * railOffset)
 
-    val railWidth = cellPx * 0.07f
+    // bayangan di belakang rel untuk kesan timbul (3D)
+    drawLine(shadowColor, rail1Start + shadowDelta, rail1End + shadowDelta, strokeWidth = railWidth, cap = StrokeCap.Round)
+    drawLine(shadowColor, rail2Start + shadowDelta, rail2End + shadowDelta, strokeWidth = railWidth, cap = StrokeCap.Round)
+
     drawLine(theme.ladderColor, rail1Start, rail1End, strokeWidth = railWidth, cap = StrokeCap.Round)
     drawLine(theme.ladderColor, rail2Start, rail2End, strokeWidth = railWidth, cap = StrokeCap.Round)
+    // garis kilau tipis di tengah tiap rel, kesan kayu mengilap
+    drawLine(highlightColor, rail1Start, rail1End, strokeWidth = railWidth * 0.28f, cap = StrokeCap.Round)
+    drawLine(highlightColor, rail2Start, rail2End, strokeWidth = railWidth * 0.28f, cap = StrokeCap.Round)
 
-    val rungCount = (length / (cellPx * 0.45f)).roundToInt().coerceAtLeast(3)
+    val rungCount = (length / (cellPx * 0.4f)).roundToInt().coerceAtLeast(4)
+    val rungWidth = cellPx * 0.075f
     for (i in 1 until rungCount) {
         val t = i / rungCount.toFloat()
         val center = Offset(a.x + dir.x * t, a.y + dir.y * t)
         val rungStart = Offset(center.x + perp.x * railOffset, center.y + perp.y * railOffset)
         val rungEnd = Offset(center.x - perp.x * railOffset, center.y - perp.y * railOffset)
-        drawLine(theme.ladderRungColor, rungStart, rungEnd, strokeWidth = cellPx * 0.05f, cap = StrokeCap.Round)
+        drawLine(shadowColor, rungStart + shadowDelta, rungEnd + shadowDelta, strokeWidth = rungWidth, cap = StrokeCap.Round)
+        drawLine(theme.ladderRungColor, rungStart, rungEnd, strokeWidth = rungWidth, cap = StrokeCap.Round)
+        drawLine(highlightColor, rungStart, rungEnd, strokeWidth = rungWidth * 0.25f, cap = StrokeCap.Round)
     }
 }
 
-/** Ular proper: badan menyambung meruncing ke ekor (bukan rangkaian bulatan/cacing), kepala menghadap keluar dengan mata sipit dan lidah bercabang. */
+/** Ular proper: badan menyambung meruncing ke ekor dengan garis perut terang & sisik berjajar, kepala besar menghadap keluar dengan mata & lidah bercabang yang jelas terlihat. */
 private fun DrawScope.drawSnake(a: Offset, b: Offset, theme: BoardTheme, cellPx: Float) {
     val control = Offset((a.x + b.x) / 2f + cellPx * 0.6f, (a.y + b.y) / 2f)
-    val segments = 32
+    val segments = 40
     val points = (0..segments).map { i -> quadraticPoint(a, control, b, i / segments.toFloat()) }
     val darkScale = Color(
-        red = theme.snakeColor.red * 0.55f,
-        green = theme.snakeColor.green * 0.55f,
-        blue = theme.snakeColor.blue * 0.55f
+        red = theme.snakeColor.red * 0.5f,
+        green = theme.snakeColor.green * 0.5f,
+        blue = theme.snakeColor.blue * 0.5f
     )
+    val lightBelly = Color(
+        red = (theme.snakeColor.red + 0.35f).coerceAtMost(1f),
+        green = (theme.snakeColor.green + 0.35f).coerceAtMost(1f),
+        blue = (theme.snakeColor.blue + 0.25f).coerceAtMost(1f)
+    )
+    fun widthAt(t: Float) = (cellPx * (0.34f - 0.21f * t)).coerceAtLeast(cellPx * 0.055f)
 
+    // badan utama, meruncing dari kepala ke ekor
     for (i in 0 until points.size - 1) {
         val t = i / (points.size - 1).toFloat()
-        val width = (cellPx * (0.30f - 0.20f * t)).coerceAtLeast(cellPx * 0.045f)
         drawLine(
             color = theme.snakeColor,
             start = points[i],
             end = points[i + 1],
-            strokeWidth = width,
+            strokeWidth = widthAt(t),
             cap = StrokeCap.Round
         )
     }
 
-    listOf(4, 10, 16, 22).forEach { i ->
-        if (i >= points.size - 1) return@forEach
+    // garis perut terang di sisi bawah badan, kesan bervolume bukan pipih
+    for (i in 0 until points.size - 1) {
         val t = i / (points.size - 1).toFloat()
-        val width = (cellPx * (0.30f - 0.20f * t)).coerceAtLeast(cellPx * 0.045f)
+        val width = widthAt(t)
         val dir = Offset(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y)
         val len = sqrt(dir.x * dir.x + dir.y * dir.y)
-        if (len < 0.001f) return@forEach
+        if (len < 0.001f) continue
         val perp = Offset(-dir.y / len, dir.x / len)
-        val half = width * 0.4f
+        val off = width * 0.24f
         drawLine(
-            color = darkScale,
-            start = Offset(points[i].x + perp.x * half, points[i].y + perp.y * half),
-            end = Offset(points[i].x - perp.x * half, points[i].y - perp.y * half),
-            strokeWidth = cellPx * 0.028f,
+            color = lightBelly.copy(alpha = 0.55f),
+            start = Offset(points[i].x + perp.x * off, points[i].y + perp.y * off),
+            end = Offset(points[i + 1].x + perp.x * off, points[i + 1].y + perp.y * off),
+            strokeWidth = width * 0.3f,
             cap = StrokeCap.Round
         )
+    }
+
+    // sisik berjajar di sepanjang badan (bukan cuma 4 titik) supaya tidak polos
+    var i = 3
+    while (i < points.size - 1) {
+        val t = i / (points.size - 1).toFloat()
+        val width = widthAt(t)
+        val dir = Offset(points[i + 1].x - points[i].x, points[i + 1].y - points[i].y)
+        val len = sqrt(dir.x * dir.x + dir.y * dir.y)
+        if (len >= 0.001f) {
+            val perp = Offset(-dir.y / len, dir.x / len)
+            val half = width * 0.42f
+            drawLine(
+                color = darkScale,
+                start = Offset(points[i].x + perp.x * half, points[i].y + perp.y * half),
+                end = Offset(points[i].x - perp.x * half, points[i].y - perp.y * half),
+                strokeWidth = cellPx * 0.022f,
+                cap = StrokeCap.Round
+            )
+        }
+        i += 3
     }
 
     val head = points.first()
-    val neck = points[minOf(3, points.size - 1)]
+    val neck = points[minOf(4, points.size - 1)]
     val angleDeg = Math.toDegrees(atan2((head.y - neck.y).toDouble(), (head.x - neck.x).toDouble())).toFloat()
 
     rotate(degrees = angleDeg, pivot = head) {
+        // kepala lebih besar & jelas, bentuk oval lebar menghadap keluar
         drawOval(
             color = theme.snakeColor,
-            topLeft = Offset(head.x - cellPx * 0.08f, head.y - cellPx * 0.15f),
-            size = Size(cellPx * 0.36f, cellPx * 0.30f)
+            topLeft = Offset(head.x - cellPx * 0.10f, head.y - cellPx * 0.19f),
+            size = Size(cellPx * 0.44f, cellPx * 0.38f)
+        )
+        // bayangan rahang bawah supaya kepala terasa bervolume
+        drawOval(
+            color = darkScale.copy(alpha = 0.5f),
+            topLeft = Offset(head.x - cellPx * 0.06f, head.y + cellPx * 0.02f),
+            size = Size(cellPx * 0.34f, cellPx * 0.16f)
         )
 
-        val eyeX = head.x + cellPx * 0.14f
-        listOf(head.y - cellPx * 0.09f, head.y + cellPx * 0.02f).forEach { eyeY ->
+        val eyeX = head.x + cellPx * 0.16f
+        listOf(head.y - cellPx * 0.11f, head.y + cellPx * 0.03f).forEach { eyeY ->
+            // sklera putih dulu baru pupil, supaya mata lebih kelihatan dari jauh
+            drawCircle(color = Color.White, radius = cellPx * 0.065f, center = Offset(eyeX, eyeY))
             drawOval(
                 color = Color(0xFFFFD600),
-                topLeft = Offset(eyeX - cellPx * 0.045f, eyeY - cellPx * 0.045f),
-                size = Size(cellPx * 0.09f, cellPx * 0.09f)
+                topLeft = Offset(eyeX - cellPx * 0.05f, eyeY - cellPx * 0.05f),
+                size = Size(cellPx * 0.1f, cellPx * 0.1f)
             )
             drawLine(
                 color = Color.Black,
-                start = Offset(eyeX, eyeY - cellPx * 0.035f),
-                end = Offset(eyeX, eyeY + cellPx * 0.035f),
-                strokeWidth = cellPx * 0.018f,
+                start = Offset(eyeX, eyeY - cellPx * 0.04f),
+                end = Offset(eyeX, eyeY + cellPx * 0.04f),
+                strokeWidth = cellPx * 0.022f,
                 cap = StrokeCap.Round
             )
         }
 
-        val tongueBase = Offset(head.x + cellPx * 0.2f, head.y - cellPx * 0.035f)
-        val tongueTip = Offset(head.x + cellPx * 0.32f, head.y - cellPx * 0.035f)
-        drawLine(Color(0xFFD32F2F), tongueBase, tongueTip, strokeWidth = cellPx * 0.018f, cap = StrokeCap.Round)
+        val tongueBase = Offset(head.x + cellPx * 0.24f, head.y - cellPx * 0.04f)
+        val tongueTip = Offset(head.x + cellPx * 0.4f, head.y - cellPx * 0.04f)
+        drawLine(Color(0xFFD32F2F), tongueBase, tongueTip, strokeWidth = cellPx * 0.022f, cap = StrokeCap.Round)
         drawLine(
             Color(0xFFD32F2F),
             tongueTip,
-            Offset(tongueTip.x + cellPx * 0.05f, tongueTip.y - cellPx * 0.04f),
-            strokeWidth = cellPx * 0.014f,
+            Offset(tongueTip.x + cellPx * 0.06f, tongueTip.y - cellPx * 0.05f),
+            strokeWidth = cellPx * 0.017f,
             cap = StrokeCap.Round
         )
         drawLine(
             Color(0xFFD32F2F),
             tongueTip,
-            Offset(tongueTip.x + cellPx * 0.05f, tongueTip.y + cellPx * 0.04f),
-            strokeWidth = cellPx * 0.014f,
+            Offset(tongueTip.x + cellPx * 0.06f, tongueTip.y + cellPx * 0.05f),
+            strokeWidth = cellPx * 0.017f,
             cap = StrokeCap.Round
         )
     }
@@ -216,7 +265,7 @@ fun BoardView(
     var boardHeightPx by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
     val textColor = android.graphics.Color.argb(
-        140,
+        200,
         (theme.onBackground.red * 255).toInt(),
         (theme.onBackground.green * 255).toInt(),
         (theme.onBackground.blue * 255).toInt()
@@ -252,27 +301,27 @@ fun BoardView(
                         drawCircle(color = theme.cardCellColor, radius = cellMin * 0.12f, center = geo.center)
                     }
                     if (cell in BoardConfig.mysteryCells) {
-                        drawCircle(color = theme.mysteryCellColor, radius = cellMin * 0.16f, center = geo.center)
+                        drawCircle(color = theme.mysteryCellColor, radius = cellMin * 0.19f, center = geo.center)
                         drawContext.canvas.nativeCanvas.drawText(
                             "?",
-                            geo.center.x - cellMin * 0.05f,
-                            geo.center.y + cellMin * 0.06f,
+                            geo.center.x - cellMin * 0.06f,
+                            geo.center.y + cellMin * 0.075f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.WHITE
-                                textSize = cellMin * 0.2f
+                                textSize = cellMin * 0.25f
                                 isFakeBoldText = true
                             }
                         )
                     }
                     if (cell in BoardConfig.miniGameCells) {
-                        drawCircle(color = theme.miniGameCellColor, radius = cellMin * 0.16f, center = geo.center)
+                        drawCircle(color = theme.miniGameCellColor, radius = cellMin * 0.19f, center = geo.center)
                         drawContext.canvas.nativeCanvas.drawText(
                             "⚡",
-                            geo.center.x - cellMin * 0.07f,
-                            geo.center.y + cellMin * 0.07f,
+                            geo.center.x - cellMin * 0.09f,
+                            geo.center.y + cellMin * 0.09f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.WHITE
-                                textSize = cellMin * 0.2f
+                                textSize = cellMin * 0.25f
                                 isFakeBoldText = true
                             }
                         )
@@ -285,26 +334,26 @@ fun BoardView(
                         )
                         drawContext.canvas.nativeCanvas.drawText(
                             "✕",
-                            geo.center.x - cellMin * 0.08f,
-                            geo.center.y + cellMin * 0.08f,
+                            geo.center.x - cellMin * 0.1f,
+                            geo.center.y + cellMin * 0.1f,
                             android.graphics.Paint().apply {
                                 color = android.graphics.Color.RED
-                                textSize = cellMin * 0.28f
+                                textSize = cellMin * 0.34f
                                 isFakeBoldText = true
                             }
                         )
                     }
                     drawContext.canvas.nativeCanvas.drawText(
                         cell.toString(),
-                        topLeft.x + cellMin * 0.08f,
-                        topLeft.y + cellMin * 0.22f,
+                        topLeft.x + cellMin * 0.1f,
+                        topLeft.y + cellMin * 0.27f,
                         android.graphics.Paint().apply {
                             color = if (cell == BoardConfig.TOTAL_CELLS) {
                                 android.graphics.Color.parseColor("#FFEB3B")
                             } else {
                                 textColor
                             }
-                            textSize = cellMin * 0.19f
+                            textSize = cellMin * 0.25f
                             isFakeBoldText = true
                         }
                     )
@@ -327,7 +376,7 @@ fun BoardView(
                 val jitterY = if (players.size > 1) ((index / 2) - 0.5f) * cellH * 0.26f else 0f
                 val animated by animateOffsetAsState(
                     targetValue = Offset(target.x + jitterX, target.y + jitterY),
-                    animationSpec = tween(220),
+                    animationSpec = tween(380),
                     label = "piece-${player.id}"
                 )
                 val pieceSizePx = cellMin * 0.58f
@@ -382,7 +431,7 @@ fun BoardLegend(theme: BoardTheme, modifier: Modifier = Modifier) {
     ) {
         Text(
             "KETERANGAN",
-            fontSize = 9.sp,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             color = theme.boardBorder
         )
@@ -398,7 +447,7 @@ fun BoardLegend(theme: BoardTheme, modifier: Modifier = Modifier) {
 @Composable
 private fun LegendItem(emoji: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(emoji, fontSize = 18.sp)
-        Text(label, fontSize = 9.sp, color = Color(0xFF555555))
+        Text(emoji, fontSize = 22.sp)
+        Text(label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = Color(0xFF444444))
     }
 }

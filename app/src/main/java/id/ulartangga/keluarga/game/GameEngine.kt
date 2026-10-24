@@ -54,7 +54,8 @@ class GameEngine(
         private const val MAX_LOG_ENTRIES = 60
         private const val DICE_SHAKE_TICKS = 5
         private const val DICE_SHAKE_INTERVAL_MS = 100L
-        private const val MOVE_STEP_DELAY_MS = 260L
+        private const val MOVE_STEP_DELAY_MS = 450L
+        private const val EVENT_READ_DELAY_MS = 550L
     }
 
     fun resolveMiniGame(success: Boolean) {
@@ -124,7 +125,7 @@ class GameEngine(
                 onSound(SoundEvent.STEP)
                 delay(MOVE_STEP_DELAY_MS)
             }
-            delay(150)
+            delay(200)
             for (cell in target downTo start) {
                 player.animatedCell = cell
                 onSound(SoundEvent.STEP)
@@ -143,7 +144,7 @@ class GameEngine(
         }
         player.position = target
         message = "${player.name} melempar dadu ($finalRoll): $start → $target"
-        delay(250)
+        delay(EVENT_READ_DELAY_MS)
 
         if (finishTurnIfWon(player)) return
 
@@ -152,13 +153,13 @@ class GameEngine(
             player.cards.add(newCard)
             message = "${player.name} dapat kartu ${newCard.emoji} ${newCard.label}!"
             onSound(SoundEvent.CARD)
-            delay(400)
+            delay(EVENT_READ_DELAY_MS)
         }
 
         var mysteryMoved = false
         if (target in BoardConfig.mysteryCells) {
             mysteryMoved = resolveMystery(player)
-            delay(400)
+            delay(EVENT_READ_DELAY_MS)
         }
 
         if (finishTurnIfWon(player)) return
@@ -184,19 +185,19 @@ class GameEngine(
             } else {
                 message = "${player.name} belum berhasil tantangan Tap Cepat, coba lagi lain kali!"
             }
-            delay(400)
+            delay(EVENT_READ_DELAY_MS)
         }
 
         if (finishTurnIfWon(player)) return
 
         if (!mysteryMoved && !miniGameMoved) {
             BoardConfig.ladders[target]?.let { end ->
-                delay(200)
+                delay(250)
                 player.animatedCell = end
                 player.position = end
                 message = "${player.name} naik tangga ke $end!"
                 onSound(SoundEvent.LADDER)
-                delay(400)
+                delay(EVENT_READ_DELAY_MS)
             }
 
             BoardConfig.snakes[target]?.let { end ->
@@ -204,13 +205,13 @@ class GameEngine(
                     message = "${player.name} kena ular tapi terlindungi Perisai!"
                     onSound(SoundEvent.CARD)
                 } else {
-                    delay(200)
+                    delay(250)
                     player.animatedCell = end
                     player.position = end
                     message = "${player.name} kena ular, turun ke $end!"
                     onSound(SoundEvent.SNAKE)
                 }
-                delay(400)
+                delay(EVENT_READ_DELAY_MS)
             }
         }
 
